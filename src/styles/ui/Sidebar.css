@@ -1,0 +1,106 @@
+/* Sidebar wrapper */
+.sidebar {
+  position: fixed;
+  top: 80px !important; /* adjust if needed below top navbar */
+  left: 0;
+  bottom: 0;
+  width: 280px;
+  background-color: #fff;
+  overflow-y: auto;
+  z-index: 100;
+  box-shadow: 1px 0 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+/* Sidebar menu structure */
+.menu {
+  display: flex;
+  flex-direction: column;
+  height: 50px !important;
+  bottom: 5px;
+  padding: 0.5rem 0.75rem;
+  gap: 5px;
+}
+
+/* Menu Item Styling */
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  text-decoration: none;
+  color: #666;
+  font-size: 0.875rem;
+  border-radius: 0.375rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.menu-item:hover,
+.menu-item.active {
+  background-color: #836efe;
+  color: #fff;
+  font-weight: 600;
+}
+
+.menu-item.active .menu-icon,
+.menu-item:hover .menu-icon {
+  filter: brightness(0) invert(1); /* white icon on active/hover */
+}
+
+/* Icon sizing */
+.menu-icon {
+  width: 18px;
+  height: 18px;
+  transition: transform 0.2s ease;
+}
+
+.menu-item:hover .menu-icon {
+  transform: scale(1.1);
+}
+
+/* Text inside menu */
+.menu-item .text {
+  white-space: nowrap;
+}
+
+/* Media Query for Mobile */
+@media (max-width: 576px) {
+  .sidebar {
+    position: fixed;
+    top: 60px; /* adjust if you have a smaller mobile navbar */
+    width: 100%;
+    height: auto;
+    padding: 0.5rem 1rem;
+    box-shadow: none;
+  }
+
+  .menu {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.25rem;
+  }
+
+  .menu-item {
+    flex: 1 1 30%;
+    justify-content: center;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  .menu-icon {
+    width: 14px;
+    height: 14px;
+  }
+
+  .menu-item .text {
+    display: none; /* optionally hide text on very small screens */
+  }
+}
+@media (max-width:1300px) {
+.menu-item {
+  
+  padding: 0.39rem 0.7rem;
+  
+}
+}

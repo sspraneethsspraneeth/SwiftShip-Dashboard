@@ -1,0 +1,412 @@
+/* Base */
+.dashboard-page {
+  padding: 20px;
+  background-color: #f8f9fb;
+}
+
+.dashboard-main-container {
+  background-color: #f8f9fb;
+  min-height: 100vh;
+}
+.recent-activity {
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db transparent;
+}
+
+.recent-activity::-webkit-scrollbar {
+  width: 6px;
+}
+
+.recent-activity::-webkit-scrollbar-thumb {
+  background-color: #d1d5db;
+  border-radius: 10px;
+}
+
+
+/* Stat Cards */
+.stat-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffffff;
+  padding: 20px 24px;
+  border-radius: 16px;
+  height: 120px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease;
+}
+.stat-card:hover {
+  transform: translateY(-2px);
+}
+.stat-left {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.stat-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #727272;
+}
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #39335E;
+  line-height: 1;
+}
+.stat-change {
+  font-size: 12px;
+  font-weight: 600;
+}
+.stat-change.positive {
+  color: #22c55e;
+}
+.stat-change.negative {
+  color: #ef4444;
+}
+.stat-month {
+  color: #9ca3af;
+  font-size: 10px;
+}
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  background-color: #e0ebff;
+  border-radius: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Dashboard Section Containers */
+.revenue-chart-container,
+.shipments-delays-container,
+.recent-activity-container,
+.deliveries-container,
+.fleet-gauge-card,
+.avg-delivery-chart-container {
+  background-color: #fff;
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  height: 400px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Titles */
+.chart-title,
+.delays-title,
+.recent-activity-title,
+.deliveries-title,
+.fleet-title,
+.avg-delivery-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #283d56;
+  margin-bottom: 20px;
+}
+
+/* Chart Content */
+.chart-content {
+  flex: 1;
+  display: flex;
+  gap: 16px;
+}
+.chart-header {
+  width: 100%;
+}
+.chart-y-axis {
+  width: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 10px 0 30px 0;
+}
+.y-axis-label {
+  font-size: 11px;
+  color: #9ca3af;
+  text-align: right;
+}
+.chart-area {
+  flex: 1;
+  position: relative;
+}
+.chart-earnings {
+  font-size: 1rem;
+  color: #6b7280;
+}
+.chart-earnings-value {
+  font-size: 1rem;
+}
+.chart-dropdown select {
+  border-radius: 10px;
+  padding: 6px 12px;
+  font-size: 0.95rem;
+  width: 123px;
+}
+.chart-checkboxes {
+  margin-top: 16px;
+}
+
+.chart-checkboxes .form-check-input {
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+}
+
+.chart-checkboxes label {
+  font-size: 14px;
+  cursor: pointer;
+}
+
+
+/* Delays Center Chart */
+.delays-chart-area {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.delay-count {
+  font-size: 36px;
+  font-weight: 700;
+  color: #283D56;
+}
+.delay-label {
+  font-size: 14px;
+  color: #727272;
+}
+
+/* Recent Activity Table */
+.activity-header,
+.activity-row {
+  display: grid;
+  grid-template-columns: 40px 120px 1fr 1fr 100px 120px 100px 80px 40px;
+  align-items: center;
+  height: 60px;
+  border-bottom: 1px solid #f1f3f4;
+  font-size: 13px;
+  padding: 0 8px;
+}
+.activity-header {
+  font-weight: 600;
+  color: #727272;
+  height: 40px;
+  width:100%;
+}
+.activity-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1d2b53;
+}
+.recent-activity {
+  font-family: 'lato', sans-serif;
+  font-size: 16px;
+}
+
+
+.recent-activity-month-filter {
+  background-color: #ffffff;
+  font-size: 1rem;
+  border: "transparent";
+  color: #1d2b53;
+  cursor: pointer;
+}
+/* DashboardPage.css */
+.recent-activity table tbody tr {
+  padding-bottom: 8px;
+}
+.recent-activity table td {
+  padding: 12px 8px;
+}
+
+.arrow-icon {
+  width: 12px;
+  height: 12px;
+}
+.activity-row span {
+  font-weight: 500;
+  color: #374151;
+}
+.status {
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+}
+.status-delivered {
+  background-color: #e6f4ea;
+  color: #2e7d32;
+}
+.status-transit {
+  background-color: #fff4e5;
+  color: #ef6c00;
+}
+.status-delayed {
+  background-color: #fdecea;
+  color: #c62828;
+}
+.fleet-legend {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  padding-bottom: 1rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: #1e293b;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-item .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.dot.total {
+  background-color: #ec407a;
+}
+
+.dot.move {
+  background-color: #f48fb1;
+}
+
+.dot.maintenance {
+  background-color: #fce4ec;
+}
+
+.legend-item strong {
+  font-weight: 600;
+}
+
+/* Legend for Fleet */
+.legend {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: #1e293b;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 6px;
+}
+
+.legend-dot.traffic {
+  background-color: #678AF7;
+}
+
+.legend-dot.weather {
+  background-color: #FD8ADC;
+}
+
+.legend-dot.other {
+  background-color: #6BDAAE;
+}
+
+.legend-label strong {
+  font-weight: 600;
+  margin-left: 3px;
+}
+.activity-overview-card {
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  min-height: 360px;
+}
+
+.timeline-wrapper {
+  padding-left: 10px;
+  padding-top: 8px;
+}
+
+.timeline-item {
+  align-items: flex-start;
+}
+
+.timeline-indicator {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 20px;
+  top:10px;
+}
+.fw-bold {
+  font-weight: 600 !important;
+}
+.timeline-indicator .dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 3px solid #a78bfa;
+  background-color: white;
+  z-index: 2;
+}
+
+.timeline-indicator .line {
+  flex-grow: 1;
+  width: 2px;
+  background-color: #e5e7eb;
+  margin-top: 2px;
+  z-index: 1;
+}
+
+
+.activity-overview-card .text-success {
+  display: inline-block;
+  margin-top: 10px;
+  margin-bottom: 30px;
+}
+
+
+
+/* Responsive: 2 cards per row from 425px to 1024px */
+@media screen and (min-width: 425px) and (max-width: 1794px) {
+  .dashboard-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+
+  .dashboard-cards > div {
+    width: 100%;
+  }
+}
+
+/* Mobile fallback */
+@media screen and (max-width: 424px) {
+  .dashboard-cards {
+    display: block;
+  }
+}
+.row-custom-two {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  padding: 0 12px; /* Optional: aligns with Bootstrap gutter */
+}
+
+/* Between 425px and 1794px: Only 2 items per row */
+@media screen and (min-width: 425px) and (max-width: 1794px) {
+  .row-custom-two {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* From 1795px and up: 3 items per row */
+@media screen and (min-width: 1795px) {
+  .row-custom-two {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

@@ -1,0 +1,65 @@
+.delivery-container {
+  padding: 24px;
+}
+
+.delivery-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 32px;
+}
+
+.delivery-card h5 {
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.delivery-card .row > div {
+  margin-bottom: 16px;
+}
+
+.delivery-card label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #555;
+}
+
+.delivery-card input[type="text"],
+.delivery-card input[type="file"],
+.delivery-card input[type="date"] {
+  border-radius: 6px;
+  height: 38px;
+  font-size: 14px;
+}
+
+.delivery-card .form-control:focus {
+  box-shadow: none;
+  border-color: #6f42c1;
+}
+
+.status-badge {
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 20px;
+  padding: 6px 16px;
+}
+
+.delivery-btn-group {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.btn-primary {
+  background-color: #715aff;
+  border-color: #715aff;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.btn-secondary {
+  border-radius: 8px;
+  font-weight: 500;
+}

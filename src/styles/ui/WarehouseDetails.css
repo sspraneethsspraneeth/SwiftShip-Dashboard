@@ -1,0 +1,54 @@
+.warehouse-details-container {
+  max-width: 900px;
+  margin: auto;
+  background-color: #fff;
+}
+
+.card h3 {
+  color: #333;
+}
+
+.card strong {
+  font-weight: 600;
+}
+
+.badge {
+  font-size: 14px;
+  padding: 6px 0;
+}
+.badge {
+  font-size: 14px;
+}
+
+.table td, .table th {
+  vertical-align: middle;
+}
+.shipments-table-section {
+  background-color: #f8f9fb;
+  min-height: 100vh;
+}
+
+.modal-content {
+  border-radius: 20px;
+}
+
+.modal-header {
+  border-bottom: none;
+}
+
+.modal-footer {
+  border-top: none;
+}
+
+.badge span {
+  font-weight: bold;
+  cursor: pointer;
+}
+.fulfillment-modal .modal-dialog {
+  max-width: 500px;
+  border-radius: 20px;
+}
+.dropdown-toggle::after {
+  display: none !important;
+}
+

@@ -1,0 +1,109 @@
+.topbar {
+  background-color: #ffffff;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  z-index: 1000;
+  position: sticky;
+  top: 0;
+  width: 100%; /* ensure it fits inside Bootstrap grid */
+ 
+}
+.language-select {
+  border: none;
+  background: transparent;
+  font-weight: 600;
+  color: #283d56;
+  font-family: 'montserrat', sans-serif;
+  cursor: pointer;
+}
+
+.language-select:focus {
+  outline: none;
+}
+
+
+.bell-icon {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  transition: filter 0.3s ease;
+  color: #474D66;
+}
+
+.bell-icon:hover {
+  filter: brightness(0.8);
+}
+.user-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 100%;
+  object-fit: cover;
+ 
+   
+}
+
+
+/* Responsive adjustment for small screens */
+@media (max-width: 768px) {
+  .topbar {
+    left: 0;
+    padding: 0 15px;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+}
+
+.page-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #474D66;
+  font-family: 'Prompt', sans-serif;
+  margin: 0;
+}
+
+.topbar-right {
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.language,
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 16px;
+  color: #283D56;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'montserrat', sans-serif;
+}
+
+.language:hover,
+.user-profile:hover {
+  color: #222;
+}
+
+.language-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  transition: transform 0.2s ease;
+}
+
+.language:hover .language-icon,
+.user-profile:hover .language-icon {
+  transform: scale(1.1);
+}
+.user-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 100%;
+  object-fit: cover;
+ 
+   
+}

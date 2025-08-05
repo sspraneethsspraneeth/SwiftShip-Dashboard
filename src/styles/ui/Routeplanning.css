@@ -1,0 +1,105 @@
+/* RoutePlanning.css */
+.route-planning-container {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.04);
+  font-family: 'Inter', sans-serif;
+}
+
+.route-table thead th {
+  background-color: #f8f9fb;
+  font-weight: 600;
+}
+.input-group{
+ margin-top: 20px;
+}
+.text-secondary{
+  color: #3366FF !important;
+}
+.input-group-text{
+  top: 10px;
+}
+.table{
+  margin-top: 50px;
+}
+.table thead th{
+font-family: 'Lato', sans-serif;
+font-weight: 700;
+font-size: 16px;
+line-height: 26px;
+color:#283D56 ;
+
+}
+.form-label{
+font-family: 'Montserrat', sans-serif;
+font-weight: 600;
+font-size: 14px;
+letter-spacing: 0px;
+color: #474D66;
+}
+.form-control{
+  top:1px;
+  bottom: 10px !important;
+  color:#727272;
+  font-family: 'Lato', sans-serif;
+  font-weight: 400;
+  size: 12px;
+}
+.search-bar-row {
+  margin-bottom: 10px;
+}
+.table tbody td {
+    padding-top: 16px;
+    padding-bottom: 16px;
+    size: 16px;
+    font-weight: 400;
+    font-family: 'lato', sans-serif !important;
+    color: #474D66;
+}
+.mt-3{
+  margin-top: -1rem !important;
+}
+.mb-2{
+  margin-bottom: 0rem !important;
+}
+
+.map-container iframe {
+  width: 100%;
+  border-radius: 12px;
+}
+
+.status-overview div {
+  padding: 8px 12px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.status-box {
+  padding: 8px 14px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  font-size: 14px;
+}
+.half-width {
+  width: 23% !important;
+  
+}
+.badge {
+  white-space: nowrap;
+}
+
+.btn-primary{
+  background-color: #6f5ce8;
+  border-color: #6f5ce8;
+}
+.text-primary {
+   color: #F89C50 !important;
+}
+.text-primaryy {
+  color: #6f5ce8 !important;
+}
+.bg-light {
+    --bs-bg-opacity: 0;
+    background-color: rgba(var(--bs-light-rgb), var(--bs-bg-opacity)) ;
+}

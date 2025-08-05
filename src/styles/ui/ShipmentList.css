@@ -1,0 +1,35 @@
+.shipment-table .text-orange {
+  color: #fd7e14;
+  cursor: pointer;
+}
+
+.badge.bg-pink {
+  background-color: #fcd3e1;
+  color: #d63384;
+}
+
+.badge.status-delivered {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.badge.status-pending {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.badge.status-delayed {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.badge.status-in-transit {
+  background-color: #d1ecf1;
+  color: #0c5460;
+}
+
+.three-dots-btn {
+  border: none;
+  background: transparent;
+  font-weight: bold;
+}

@@ -1,0 +1,28 @@
+/* src/styles/ui/SettingsPage.css */
+.settings-page {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.tabs-container {
+  background: #f8f9fa;
+  padding: 8px;
+  border-radius: 6px;
+}
+
+.tab-button {
+  border: none;
+  background: none;
+  padding: 10px 20px;
+  font-weight: 500;
+  color: #6c757d;
+  cursor: pointer;
+  width:100%;
+}
+
+.tab-button.active {
+  background: white;
+  border-radius: 6px;
+  color: #121212;
+  box-shadow: 0 0 0 0px #dee2e6;
+}
