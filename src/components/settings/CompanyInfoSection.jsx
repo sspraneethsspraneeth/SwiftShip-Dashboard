@@ -1,4 +1,8 @@
+// src/components/settings/CompanyInfoSection.jsx
 import React, { useState } from 'react';
+import axios from 'axios';
+import BASE_URL from "../../utils/apiConfig";
+
 
 const CompanyInfoSection = () => {
   const [companyInfo, setCompanyInfo] = useState({
@@ -15,6 +19,8 @@ const CompanyInfoSection = () => {
     language: 'English',
   });
 
+  const [loading, setLoading] = useState(false);
+
   const handleFileChange = (e) => {
     setCompanyInfo({ ...companyInfo, logo: e.target.files[0] });
   };
@@ -29,8 +35,36 @@ const CompanyInfoSection = () => {
     setPreferences({ ...preferences, [name]: value });
   };
 
-  const handleSave = () => {
-    alert('Changes saved!');
+  const handleSave = async () => {
+    try {
+      setLoading(true);
+      const formData = new FormData();
+
+      // Append company info
+      formData.append('companyName', companyInfo.companyName);
+      formData.append('email', companyInfo.email);
+      formData.append('phone', companyInfo.phone);
+      formData.append('address', companyInfo.address);
+      if (companyInfo.logo) {
+        formData.append('logo', companyInfo.logo);
+      }
+
+      // Append preferences
+      formData.append('currency', preferences.currency);
+      formData.append('timezone', preferences.timezone);
+      formData.append('language', preferences.language);
+
+      await axios.post(`${BASE_URL}/company-info`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      alert('Company information saved successfully!');
+    } catch (err) {
+      console.error('Error saving company info:', err);
+      alert('Failed to save company information.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -42,7 +76,7 @@ const CompanyInfoSection = () => {
             <label className="form-label">Company Logo</label>
             <div className="d-flex align-items-center">
               <div
-                className="form-control "
+                className="form-control"
                 style={{
                   backgroundColor: '#f9f9fc',
                   height: '38px',
@@ -52,7 +86,7 @@ const CompanyInfoSection = () => {
                   borderBottomRightRadius: '0',
                 }}
               >
-                Select file
+                {companyInfo.logo ? companyInfo.logo.name : 'Select file'}
               </div>
               <label
                 htmlFor="company-logo-input"
@@ -61,16 +95,14 @@ const CompanyInfoSection = () => {
                   backgroundColor: '#7f56d9',
                   color: '#fff',
                   height: '35px',
-                  borderTopLeftRadius: '10',
-                  borderBottomLeftRadius: '10',
                   fontSize: '14px',
-                  whiteSpace: 'nowrap', 
-                  display: 'flex',      
-                  alignItems: 'center', 
+                  whiteSpace: 'nowrap',
+                  display: 'flex',
+                  alignItems: 'center',
                   padding: '0 12px',
                 }}
               >
-                Select file
+                Browse
               </label>
               <input
                 type="file"
@@ -170,8 +202,12 @@ const CompanyInfoSection = () => {
       </div>
 
       <div className="d-flex justify-content-end">
-        <button className="btn btn-primary px-4" onClick={handleSave}>
-          Save Changes
+        <button
+          className="btn btn-primary px-4"
+          onClick={handleSave}
+          disabled={loading}
+        >
+          {loading ? 'Saving...' : 'Save Changes'}
         </button>
       </div>
     </>

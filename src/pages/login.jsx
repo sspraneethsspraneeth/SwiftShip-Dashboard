@@ -9,12 +9,14 @@ import rightSideImage from "../assets/bg.png";
 import usernameIcon from "../assets/usericon.png";
 import passwordIcon from "../assets/lockicon.png";
 import eyeShowIcon from "../assets/eyeopen.png";
-import eyeHideIcon from "../assets/eyeopen.png"; // Or use different icon for hide
+import eyeHideIcon from "../assets/eyeopen.png"; // Or use a different icon for hide
 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import BASE_URL from "../utils/apiConfig";
 
+// ✅ Firebase imports
+import { auth, provider, signInWithPopup } from "../utils/firebase";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -24,6 +26,7 @@ const LoginPage = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // ✅ Handle Email/Password Login
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -41,13 +44,44 @@ const LoginPage = () => {
         toast.error(data.message || "Login failed");
       } else {
         localStorage.setItem("token", data.token);
-        localStorage.setItem("email", email); // ✅ Required for Topbar fetching
+        localStorage.setItem("email", email);
         navigate("/dashboard");
       }
     } catch (err) {
       toast.error("Server error, please try again later.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // ✅ Handle Google Login
+  const handleGoogleLogin = async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      const response = await fetch(`${BASE_URL}/google-login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: user.email,
+          fullName: user.displayName,
+          image: user.photoURL,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        toast.error(data.message || "Google login failed");
+      } else {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("email", user.email);
+        navigate("/dashboard");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Google login error");
     }
   };
 
@@ -113,7 +147,7 @@ const LoginPage = () => {
 
           <div className="auth-divider">Or continue with</div>
 
-          <button className="auth-google-button" type="button">
+          <button className="auth-google-button" type="button" onClick={handleGoogleLogin}>
             <span className="auth-google-icon-wrapper">
               <img src={googleIcon} alt="Google" className="auth-google-icon" />
             </span>
@@ -128,7 +162,6 @@ const LoginPage = () => {
 
       <img src={rightSideImage} alt="Transportation" className="auth-right-image" />
 
-      {/* Toast container to render toasts */}
       <ToastContainer position="top-right" autoClose={4000} />
     </div>
   );

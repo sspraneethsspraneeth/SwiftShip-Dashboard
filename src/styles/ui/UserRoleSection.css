@@ -7,41 +7,63 @@
 .badge-all-permissions {
   background-color: #f5f5ff;
   color: #5b4fda;
+    border-radius: 20px;
+
+}
+
+.badge.text-capitalize {
+  margin-bottom: 5px;
 }
 
 .badge-dashboard {
   background-color: #e7e7ff;
   color: #5c6ac4;
+  border-radius: 20px;
 }
 
 .badge-shipments {
   background-color: #e7fff0;
   color: #1f9254;
+    border-radius: 20px;
+
 }
 
 .badge-orders {
   background-color: #fff3db;
   color: #ffa500;
+    border-radius: 20px;
+  
+
 }
 
 .badge-staff {
   background-color: #fff0f6;
   color: #d63384;
+    border-radius: 20px;
+
 }
 
 .badge-transactions {
   background-color: #ffe5e5;
   color: #ff4d4f;
+    border-radius: 20px;
+
 }
 
 .badge-reports {
   background-color: #fff8e1;
   color: #e6a100;
+  border-radius: 20px;
+  
+      
+
 }
 
 .badge-warehouse {
   background-color: #ebf7ff;
   color: #339af0;
+    border-radius: 20px;
+
 }
 
 /* Table cell spacing and padding matching the screenshot */

@@ -1,55 +1,43 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AddRoleModal from '../../components/settings/AddRoleModal';
 import '../../styles/ui/UserRoleSection.css';
 
-const initialRolesData = [
-  {
-    role: 'Admin',
-    description: 'Full Access',
-    permissions: ['All Permissions'],
-  },
-  {
-    role: 'Manager',
-    description: 'Operational Control',
-    permissions: ['Dashboard', 'Shipments', 'Order Management', 'Staff Management'],
-  },
-  {
-    role: 'Dispatcher',
-    description: 'Limited to Delivery & Routes',
-    permissions: ['Shipments', 'Order Management'],
-  },
-  {
-    role: 'Finance Lead',
-    description: 'Access to Billing & Transactions',
-    permissions: ['Transactions', 'Reports'],
-  },
-  {
-    role: 'Warehouse Manager',
-    description: 'Warehouse & Inventory Management',
-    permissions: ['Warehouse', 'Shipments', 'Staff Management'],
-  },
-];
-
 const UserRolesSection = () => {
-  const [roles, setRoles] = useState(initialRolesData);
+  const [roles, setRoles] = useState([]);
   const [selectedTransactions, setSelectedTransactions] = useState([]);
-  const currentRows = roles;
-
   const [showModal, setShowModal] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editField, setEditField] = useState('');
   const [fieldValue, setFieldValue] = useState('');
 
-  const handleAddRole = (newRole) => {
-    setRoles([...roles, newRole]);
+  const currentRows = roles;
+
+  // ✅ Fetch roles from backend on mount
+  useEffect(() => {
+    fetchRoles();
+  }, []);
+
+  const fetchRoles = async () => {
+    try {
+      const res = await fetch('http://localhost:5000/api/roles');
+      if (!res.ok) throw new Error('Failed to fetch roles');
+      const data = await res.json();
+      setRoles(data);
+    } catch (err) {
+      console.error('Error fetching roles:', err);
+    }
+  };
+
+  // ✅ Add new role to state (AddRoleModal does POST)
+  const handleAddRole = (savedRole) => {
+    setRoles([...roles, savedRole]);
     setShowModal(false);
   };
 
   const handleSelectAll = (e) => {
     if (e.target.checked) {
-      const allIndexes = currentRows.map((_, i) => i);
-      setSelectedTransactions(allIndexes);
+      setSelectedTransactions(currentRows.map((_, i) => i));
     } else {
       setSelectedTransactions([]);
     }
@@ -62,23 +50,46 @@ const UserRolesSection = () => {
     setFieldValue('');
   };
 
-  const handleFieldEdit = () => {
+  const handleFieldEdit = async () => {
     if (!editField || fieldValue.trim() === '') return;
 
     const updatedRoles = [...roles];
-    if (editField === 'role') updatedRoles[editIndex].role = fieldValue;
-    else if (editField === 'description') updatedRoles[editIndex].description = fieldValue;
-    else if (editField === 'permissions')
+    if (editField === 'role') {
+      updatedRoles[editIndex].role = fieldValue;
+    } else if (editField === 'description') {
+      updatedRoles[editIndex].description = fieldValue;
+    } else if (editField === 'permissions') {
       updatedRoles[editIndex].permissions = fieldValue.split(',').map((p) => p.trim());
+    }
 
     setRoles(updatedRoles);
+
+    // ✅ Send update to backend
+    try {
+      await fetch(`http://localhost:5000/api/roles/${updatedRoles[editIndex]._id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedRoles[editIndex]),
+      });
+    } catch (err) {
+      console.error('Error updating role:', err);
+    }
+
     setShowEditModal(false);
     setEditIndex(null);
   };
 
-  const handleDelete = (index) => {
+  const handleDelete = async (index) => {
     if (window.confirm('Are you sure you want to delete this role?')) {
-      setRoles(roles.filter((_, i) => i !== index));
+      const roleToDelete = roles[index];
+      try {
+        await fetch(`http://localhost:5000/api/roles/${roleToDelete._id}`, {
+          method: 'DELETE',
+        });
+        setRoles(roles.filter((_, i) => i !== index));
+      } catch (err) {
+        console.error('Error deleting role:', err);
+      }
     }
   };
 
@@ -92,7 +103,10 @@ const UserRolesSection = () => {
               Manage user roles and their permissions across the system
             </p>
           </div>
-          <button className="btn btn-primary btn-sm" onClick={() => setShowModal(true)}>
+          <button
+            className="btn btn-primary btn-sm"
+            onClick={() => setShowModal(true)}
+          >
             Add Role
           </button>
         </div>
@@ -119,7 +133,7 @@ const UserRolesSection = () => {
             </thead>
             <tbody>
               {roles.map((role, idx) => (
-                <tr key={idx}>
+                <tr key={role._id || idx}>
                   <td>
                     <input
                       type="checkbox"
@@ -140,7 +154,7 @@ const UserRolesSection = () => {
                     {role.permissions.map((perm, i) => (
                       <span
                         key={i}
-                        className={`badge me-1 px-3 py-2 text-capitalize ${
+                        className={`badge me-1 px-3 py-2 text-capitalize  ${
                           perm === 'All Permissions'
                             ? 'badge-all-permissions'
                             : perm === 'Dashboard'
@@ -166,10 +180,16 @@ const UserRolesSection = () => {
                   </td>
                   <td>
                     <div className="d-flex justify-content-end gap-2 flex-wrap flex-md-nowrap">
-                      <button className="btn btn-sm btn-outline-secondary" onClick={() => openEditModal(idx)}>
+                      <button
+                        className="btn btn-sm btn-outline-secondary"
+                        onClick={() => openEditModal(idx)}
+                      >
                         Edit
                       </button>
-                      <button className="btn btn-sm btn-danger" onClick={() => handleDelete(idx)}>
+                      <button
+                        className="btn btn-sm btn-danger"
+                        onClick={() => handleDelete(idx)}
+                      >
                         Delete
                       </button>
                     </div>
@@ -202,10 +222,30 @@ const UserRolesSection = () => {
               <div>
                 <p className="mb-2">What would you like to edit?</p>
                 <div className="d-flex flex-column gap-2">
-                  <button className="btn btn-outline-primary" onClick={() => setEditField('role')}>Role Name</button>
-                  <button className="btn btn-outline-primary" onClick={() => setEditField('description')}>Description</button>
-                  <button className="btn btn-outline-primary" onClick={() => setEditField('permissions')}>Permissions (comma-separated)</button>
-                  <button className="btn btn-secondary" onClick={() => setShowEditModal(false)}>Cancel</button>
+                  <button
+                    className="btn btn-outline-primary"
+                    onClick={() => setEditField('role')}
+                  >
+                    Role Name
+                  </button>
+                  <button
+                    className="btn btn-outline-primary"
+                    onClick={() => setEditField('description')}
+                  >
+                    Description
+                  </button>
+                  <button
+                    className="btn btn-outline-primary"
+                    onClick={() => setEditField('permissions')}
+                  >
+                    Permissions (comma-separated)
+                  </button>
+                  <button
+                    className="btn btn-secondary"
+                    onClick={() => setShowEditModal(false)}
+                  >
+                    Cancel
+                  </button>
                 </div>
               </div>
             ) : (
@@ -218,11 +258,25 @@ const UserRolesSection = () => {
                   className="form-control mb-3"
                   value={fieldValue}
                   onChange={(e) => setFieldValue(e.target.value)}
-                  placeholder={editField === 'permissions' ? 'e.g., Dashboard, Shipments' : ''}
+                  placeholder={
+                    editField === 'permissions'
+                      ? 'e.g., Dashboard, Shipments'
+                      : ''
+                  }
                 />
                 <div className="d-flex justify-content-end gap-2">
-                  <button className="btn btn-secondary" onClick={() => setShowEditModal(false)}>Cancel</button>
-                  <button className="btn btn-primary" onClick={handleFieldEdit}>Save</button>
+                  <button
+                    className="btn btn-secondary"
+                    onClick={() => setShowEditModal(false)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="btn btn-primary"
+                    onClick={handleFieldEdit}
+                  >
+                    Save
+                  </button>
                 </div>
               </div>
             )}

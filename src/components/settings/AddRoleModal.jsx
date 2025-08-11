@@ -1,6 +1,8 @@
 // src/components/settings/AddRoleModal.jsx
 import React, { useState } from 'react';
 import '../../styles/ui/UserRoleSection.css';
+import BASE_URL from "../../utils/apiConfig";
+
 
 const PERMISSIONS = [
   'Dashboard',
@@ -19,6 +21,7 @@ const AddRoleModal = ({ onClose, onSave }) => {
   const [roleName, setRoleName] = useState('');
   const [description, setDescription] = useState('');
   const [selectedPermissions, setSelectedPermissions] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const handlePermissionToggle = (perm) => {
     setSelectedPermissions((prev) =>
@@ -28,14 +31,39 @@ const AddRoleModal = ({ onClose, onSave }) => {
     );
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (!roleName.trim()) {
+      alert('Role name is required');
+      return;
+    }
+
     const newRole = {
       role: roleName,
       description,
       permissions: selectedPermissions,
     };
-    onSave(newRole);
-    onClose();
+
+    try {
+      setLoading(true);
+      const res = await fetch(`${BASE_URL}/roles`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newRole),
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to create role');
+      }
+
+      const savedRole = await res.json();
+      onSave(savedRole); // Update parent state with new role
+      onClose();
+    } catch (err) {
+      console.error(err);
+      alert('Error creating role: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -47,28 +75,27 @@ const AddRoleModal = ({ onClose, onSave }) => {
         </div>
 
         <div className="row mb-3">
-  <div className="col-6">
-    <label className="form-label">Role Name</label>
-    <input
-      type="text"
-      className="form-control"
-      value={roleName}
-      onChange={(e) => setRoleName(e.target.value)}
-      placeholder="Enter role name"
-    />
-  </div>
-  <div className="col-6">
-    <label className="form-label">Description</label>
-    <input
-      type="text"
-      className="form-control"
-      value={description}
-      onChange={(e) => setDescription(e.target.value)}
-      placeholder="Enter role description"
-    />
-  </div>
-</div>
-
+          <div className="col-6">
+            <label className="form-label">Role Name</label>
+            <input
+              type="text"
+              className="form-control"
+              value={roleName}
+              onChange={(e) => setRoleName(e.target.value)}
+              placeholder="Enter role name"
+            />
+          </div>
+          <div className="col-6">
+            <label className="form-label">Description</label>
+            <input
+              type="text"
+              className="form-control"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Enter role description"
+            />
+          </div>
+        </div>
 
         <div className="mb-3">
           <label className="form-label fw-semibold">Permissions</label>
@@ -94,8 +121,12 @@ const AddRoleModal = ({ onClose, onSave }) => {
           <button className="btn btn-light" onClick={onClose}>
             Cancel
           </button>
-          <button className="btn btn-primary" onClick={handleSubmit}>
-            Create Role
+          <button
+            className="btn btn-primary"
+            onClick={handleSubmit}
+            disabled={loading}
+          >
+            {loading ? 'Saving...' : 'Create Role'}
           </button>
         </div>
       </div>
