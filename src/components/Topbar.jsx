@@ -6,9 +6,10 @@ import globeIcon from "../assets/icons/us.png";
 import bellIcon from "../assets/icons/bell.png";
 import defaultAvatar from "../assets/icons/default-avatar.png";
 import BASE_URL from "../utils/apiConfig";
+import SOCKET_IO_URL from "../utils/apiConfig";
 
 // Connect to Socket.IO backend (adjust URL/port as needed)
-const socket = io(BASE_URL);
+const socket = io(SOCKET_IO_URL);
 
 const Topbar = () => {
   const location = useLocation();
