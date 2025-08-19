@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { useTranslation } from "react-i18next"; // <-- Added
+import { useTranslation } from "react-i18next";
 import "../../styles/ui/ShipmentListPage.css";
 import BASE_URL from "../../utils/apiConfig";
 
 const ShipmentsTable = () => {
-  const { t } = useTranslation(); // <-- Added
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [shipments, setShipments] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -16,6 +16,7 @@ const ShipmentsTable = () => {
   const [sortOrder, setSortOrder] = useState("asc");
   const [statusFilter, setStatusFilter] = useState("");
   const [showFilter, setShowFilter] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const rowsPerPage = 8;
 
@@ -30,45 +31,56 @@ const ShipmentsTable = () => {
     }
   };
 
+  const fetchShipments = async () => {
+    try {
+      const res = await axios.get(`${BASE_URL}/shipment`);
+
+      const processed = await Promise.all(
+        res.data.map(async (shipment) => {
+          const driverName = await fetchDriverName(shipment.start, shipment.end);
+          const allDelivered =
+            shipment.orders &&
+            shipment.orders.length > 0 &&
+            shipment.orders.every((order) => order.status === "Delivered");
+
+          return {
+            _id: shipment._id,
+            shipmentId: shipment.shipmentId,
+            origin: shipment.start,
+            destination: shipment.end,
+            trackingNumber: shipment.trackingNumber || "N/A",
+            vehicleType: shipment.vehicleType || "Truck",
+            estimatedDelivery: shipment.eta || "2024-10-10",
+            status: allDelivered ? t("shipments.delivered") : t("shipments.shipping"),
+            driverName,
+            dateShipped: shipment.dateShipped || "2024-10-01",
+            orders: shipment.orders || [],
+            routeId: shipment.routeId || null,
+          };
+        })
+      );
+
+      setShipments(processed);
+    } catch (err) {
+      console.error("❌ Error fetching shipments", err);
+    }
+  };
+
   useEffect(() => {
-    const fetchShipments = async () => {
-      try {
-        await axios.post(`${BASE_URL}/shipment/generate`);
-        const res = await axios.get(`${BASE_URL}/shipment`);
-
-        const processed = await Promise.all(
-          res.data.map(async (shipment) => {
-            const driverName = await fetchDriverName(shipment.start, shipment.end);
-            const allDelivered =
-              shipment.orders &&
-              shipment.orders.length > 0 &&
-              shipment.orders.every((order) => order.status === "Delivered");
-
-            return {
-              _id: shipment._id,
-              shipmentId: shipment.shipmentId,
-              origin: shipment.start,
-              destination: shipment.end,
-              trackingNumber: shipment.trackingNumber || "N/A",
-              vehicleType: shipment.vehicleType || "Truck",
-              estimatedDelivery: shipment.eta || "2024-10-10",
-              status: allDelivered ? t("shipments.delivered") : t("shipments.shipping"),
-              driverName,
-              dateShipped: shipment.dateShipped || "2024-10-01",
-              orders: shipment.orders || [],
-              routeId: shipment.routeId || null,
-            };
-          })
-        );
-
-        setShipments(processed);
-      } catch (err) {
-        console.error("❌ Error fetching shipments", err);
-      }
-    };
-
     fetchShipments();
   }, [t]);
+
+  const generateShipments = async () => {
+    setLoading(true);
+    try {
+      await axios.post(`${BASE_URL}/shipment/generate`);
+      await fetchShipments();
+    } catch (err) {
+      console.error("❌ Error generating shipments", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredShipments = shipments
     .filter((shipment) =>
@@ -164,14 +176,23 @@ const ShipmentsTable = () => {
             className="btn btn-outline-secondary me-2"
             onClick={() => handleSort("shipmentId")}
           >
-            {t("shipments.sortById")} {sortField === "shipmentId" ? (sortOrder === "asc" ? "↑" : "↓") : ""}
+            {t("shipments.sortById")}{" "}
+            {sortField === "shipmentId" ? (sortOrder === "asc" ? "↑" : "↓") : ""}
           </button>
 
           <button
-            className="btn btn-outline-secondary"
+            className="btn btn-outline-secondary me-2"
             onClick={() => setShowFilter((prev) => !prev)}
           >
             {t("shipments.filter")}
+          </button>
+
+          <button
+            className="btn btn-primary"
+            onClick={generateShipments}
+            disabled={loading}
+          >
+            {loading ? t("shipments.generating") : t("Add shipment")}
           </button>
 
           {showFilter && (
@@ -182,10 +203,18 @@ const ShipmentsTable = () => {
               style={{ width: "200px" }}
             >
               <option value="">{t("shipments.allStatuses")}</option>
-              <option value={t("shipments.delivered")}>{t("shipments.delivered")}</option>
-              <option value={t("shipments.pending")}>{t("shipments.pending")}</option>
-              <option value={t("shipments.shipping")}>{t("shipments.shipping")}</option>
-              <option value={t("shipments.delayed")}>{t("shipments.delayed")}</option>
+              <option value={t("shipments.delivered")}>
+                {t("shipments.delivered")}
+              </option>
+              <option value={t("shipments.pending")}>
+                {t("shipments.pending")}
+              </option>
+              <option value={t("shipments.shipping")}>
+                {t("shipments.shipping")}
+              </option>
+              <option value={t("shipments.delayed")}>
+                {t("shipments.delayed")}
+              </option>
             </select>
           )}
         </div>
@@ -254,7 +283,9 @@ const ShipmentsTable = () => {
                     {item.status}
                   </span>
                 </td>
-                <td><span className="dots">⋯</span></td>
+                <td>
+                  <span className="dots">⋯</span>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -272,13 +303,18 @@ const ShipmentsTable = () => {
             </button>
           </li>
           {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-            <li key={p} className={`page-item ${p === currentPage ? "active" : ""}`}>
+            <li
+              key={p}
+              className={`page-item ${p === currentPage ? "active" : ""}`}
+            >
               <button className="page-link" onClick={() => setCurrentPage(p)}>
                 {p}
               </button>
             </li>
           ))}
-          <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+          <li
+            className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}
+          >
             <button
               className="page-link"
               onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
