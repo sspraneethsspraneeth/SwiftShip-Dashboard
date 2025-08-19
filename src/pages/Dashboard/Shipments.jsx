@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useTranslation } from "react-i18next"; // <-- Added
 import "../../styles/ui/ShipmentListPage.css";
 import BASE_URL from "../../utils/apiConfig";
 
 const ShipmentsTable = () => {
+  const { t } = useTranslation(); // <-- Added
   const navigate = useNavigate();
   const [shipments, setShipments] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -31,21 +33,16 @@ const ShipmentsTable = () => {
   useEffect(() => {
     const fetchShipments = async () => {
       try {
-        // ✅ Auto-generate shipments (and deliveries) on component load
         await axios.post(`${BASE_URL}/shipment/generate`);
-
         const res = await axios.get(`${BASE_URL}/shipment`);
 
         const processed = await Promise.all(
           res.data.map(async (shipment) => {
             const driverName = await fetchDriverName(shipment.start, shipment.end);
-
             const allDelivered =
               shipment.orders &&
               shipment.orders.length > 0 &&
               shipment.orders.every((order) => order.status === "Delivered");
-
-            
 
             return {
               _id: shipment._id,
@@ -55,7 +52,7 @@ const ShipmentsTable = () => {
               trackingNumber: shipment.trackingNumber || "N/A",
               vehicleType: shipment.vehicleType || "Truck",
               estimatedDelivery: shipment.eta || "2024-10-10",
-              status: allDelivered ? "Delivered" : "Shipping",
+              status: allDelivered ? t("shipments.delivered") : t("shipments.shipping"),
               driverName,
               dateShipped: shipment.dateShipped || "2024-10-01",
               orders: shipment.orders || [],
@@ -71,7 +68,7 @@ const ShipmentsTable = () => {
     };
 
     fetchShipments();
-  }, []);
+  }, [t]);
 
   const filteredShipments = shipments
     .filter((shipment) =>
@@ -95,13 +92,13 @@ const ShipmentsTable = () => {
 
   const statusBadge = (status) => {
     switch (status) {
-      case "Delivered":
+      case t("shipments.delivered"):
         return "bg-success text-white";
-      case "Pending":
+      case t("shipments.pending"):
         return "bg-warning text-dark";
-      case "Shipping":
+      case t("shipments.shipping"):
         return "bg-info text-dark";
-      case "Delayed":
+      case t("shipments.delayed"):
         return "bg-danger text-white";
       default:
         return "bg-dark text-white";
@@ -157,7 +154,7 @@ const ShipmentsTable = () => {
         <input
           type="text"
           className="form-control search-box"
-          placeholder="Search Shipment ID"
+          placeholder={t("shipments.searchPlaceholder")}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
@@ -167,14 +164,14 @@ const ShipmentsTable = () => {
             className="btn btn-outline-secondary me-2"
             onClick={() => handleSort("shipmentId")}
           >
-            Sort by ID {sortField === "shipmentId" ? (sortOrder === "asc" ? "↑" : "↓") : ""}
+            {t("shipments.sortById")} {sortField === "shipmentId" ? (sortOrder === "asc" ? "↑" : "↓") : ""}
           </button>
 
           <button
             className="btn btn-outline-secondary"
             onClick={() => setShowFilter((prev) => !prev)}
           >
-            Filter
+            {t("shipments.filter")}
           </button>
 
           {showFilter && (
@@ -184,17 +181,17 @@ const ShipmentsTable = () => {
               onChange={handleFilter}
               style={{ width: "200px" }}
             >
-              <option value="">All Statuses</option>
-              <option value="Delivered">Delivered</option>
-              <option value="Pending">Pending</option>
-              <option value="Shipping">Shipping</option>
-              <option value="Delayed">Delayed</option>
+              <option value="">{t("shipments.allStatuses")}</option>
+              <option value={t("shipments.delivered")}>{t("shipments.delivered")}</option>
+              <option value={t("shipments.pending")}>{t("shipments.pending")}</option>
+              <option value={t("shipments.shipping")}>{t("shipments.shipping")}</option>
+              <option value={t("shipments.delayed")}>{t("shipments.delayed")}</option>
             </select>
           )}
         </div>
       </div>
 
-      <h5 className="fw-bold mb-3">All Shipments List</h5>
+      <h5 className="fw-bold mb-3">{t("shipments.title")}</h5>
 
       <div className="table-responsive">
         <table className="table table-hover align-middle">
@@ -212,14 +209,14 @@ const ShipmentsTable = () => {
                   }
                 />
               </th>
-              <th>Shipment ID</th>
-              <th>Driver Name</th>
-              <th>Origin</th>
-              <th>Destination</th>
-              <th>Date Shipped</th>
-              <th>Vehicle Type</th>
-              <th>ETA</th>
-              <th>Status</th>
+              <th>{t("shipments.shipmentId")}</th>
+              <th>{t("shipments.driverName")}</th>
+              <th>{t("shipments.origin")}</th>
+              <th>{t("shipments.destination")}</th>
+              <th>{t("shipments.dateShipped")}</th>
+              <th>{t("shipments.vehicleType")}</th>
+              <th>{t("shipments.eta")}</th>
+              <th>{t("shipments.status")}</th>
               <th></th>
             </tr>
           </thead>
@@ -271,7 +268,7 @@ const ShipmentsTable = () => {
               className="page-link"
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
             >
-              &lt; Back
+              {t("shipments.back")}
             </button>
           </li>
           {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
@@ -286,7 +283,7 @@ const ShipmentsTable = () => {
               className="page-link"
               onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
             >
-              Next &gt;
+              {t("shipments.next")}
             </button>
           </li>
         </ul>

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import io from "socket.io-client";
 import "../styles/ui/Topbar.css";
 import globeIcon from "../assets/icons/us.png";
@@ -8,52 +9,45 @@ import defaultAvatar from "../assets/icons/default-avatar.png";
 import BASE_URL from "../utils/apiConfig";
 import SOCKET_IO_URL from "../utils/apiConfig";
 
-// Connect to Socket.IO backend (adjust URL/port as needed)
-const socket = io(SOCKET_IO_URL);
+// Socket.IO connection
+const socket = io(SOCKET_IO_URL, {
+  transports: ["websocket"],
+  reconnectionAttempts: 5,
+  reconnectionDelay: 2000,
+});
 
 const Topbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
 
   const [user, setUser] = useState({ fullName: "User", image: null });
-  const [language, setLanguage] = useState("en");
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [staffName, setStaffName] = useState(null);
 
-  // Notification state
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [loadingNotifications, setLoadingNotifications] = useState(false);
-
-  // Notification count badge state
   const [notificationCount, setNotificationCount] = useState(0);
 
-  // Load language from localStorage
+  // Load saved language
   useEffect(() => {
     const savedLang = localStorage.getItem("lang");
-    if (savedLang) setLanguage(savedLang);
-  }, []);
-
-  // Save language to localStorage
-  useEffect(() => {
-    localStorage.setItem("lang", language);
-  }, [language]);
+    if (savedLang) i18n.changeLanguage(savedLang);
+  }, [i18n]);
 
   // Fetch user info
   useEffect(() => {
     const fetchUser = async () => {
       const token = localStorage.getItem("token");
       const email = localStorage.getItem("email");
-
       if (!token || !email) return;
 
       try {
         const res = await fetch(`${BASE_URL}/user?email=${email}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-
         const data = await res.json();
-
         if (res.ok) {
           setUser({
             fullName: data.user.fullName || "User",
@@ -64,11 +58,10 @@ const Topbar = () => {
         console.error("Error fetching user:", err);
       }
     };
-
     fetchUser();
   }, []);
 
-  // Fetch notifications from backend
+  // Fetch notifications
   const fetchNotifications = async () => {
     const token = localStorage.getItem("token");
     try {
@@ -88,27 +81,21 @@ const Topbar = () => {
     }
   };
 
-  // On mount fetch notifications once
   useEffect(() => {
     fetchNotifications();
   }, []);
 
-  // Socket.IO: Listen for new notifications for instant update
+  // Socket.IO new notifications
   useEffect(() => {
     socket.on("new-notification", ({ notification }) => {
-      console.log("Received new notification", notification);
-  console.log("Notification count from server:", count);
-  setNotifications(prev => [notification, ...prev]);
-  setNotificationCount(prev => prev + 1);
-});
-
-
+      setNotifications((prev) => [notification, ...prev]);
+      setNotificationCount((prev) => prev + 1);
+    });
     return () => {
       socket.off("new-notification");
     };
   }, []);
 
-  // Clear all notifications
   const handleClearAll = async () => {
     const token = localStorage.getItem("token");
     try {
@@ -129,7 +116,6 @@ const Topbar = () => {
 
   const handleLogout = async () => {
     const token = localStorage.getItem("token");
-
     try {
       await fetch(`${BASE_URL}/logout`, {
         method: "POST",
@@ -138,7 +124,6 @@ const Topbar = () => {
     } catch (err) {
       console.error("Logout failed", err);
     }
-
     localStorage.removeItem("token");
     localStorage.removeItem("email");
     navigate("/login");
@@ -146,22 +131,20 @@ const Topbar = () => {
 
   const getPageTitle = (path) => {
     const segments = path.split("/").filter(Boolean);
-    if (segments.length === 0) return "Dashboard";
+    if (segments.length === 0) return t("dashboard");
 
     if (segments[0] === "dashboard") {
-      if (segments.length === 1) return "Dashboard";
+      if (segments.length === 1) return t("dashboard");
       if (segments[1] === "shipments" && segments.length === 3) {
-        return "Dashboard > Shipment Details";
+        return `${t("dashboard")} > ${t("shipmentDetails")}`;
       }
       if (segments[1] === "staff" && segments.length === 2) {
-        return "Dashboard > Staff";
+        return `${t("dashboard")} > ${t("staff")}`;
       }
-
       return `Dashboard > ${segments[1]
         .replace(/-/g, " ")
         .replace(/\b\w/g, (c) => c.toUpperCase())}`;
     }
-
     return segments[segments.length - 1]
       .replace(/-/g, " ")
       .replace(/\b\w/g, (c) => c.toUpperCase());
@@ -181,10 +164,14 @@ const Topbar = () => {
     }
   }, [location]);
 
+  const changeLanguage = (lang) => {
+    i18n.changeLanguage(lang);
+    localStorage.setItem("lang", lang);
+  };
+
   return (
     <header className="topbar">
       <div className="d-flex align-items-center justify-content-between w-100">
-        {/* Page Title */}
         <div className="page-title-container d-flex align-items-center justify-content-center">
           <h1 className="page-title">
             {pageTitle}{" "}
@@ -192,14 +179,13 @@ const Topbar = () => {
           </h1>
         </div>
 
-        {/* Right Side */}
         <div className="topbar-right d-flex align-items-center gap-4">
           {/* Language Selector */}
           <div className="language d-flex align-items-center gap-2">
             <img src={globeIcon} alt="Language" className="language-icon" />
             <select
-              value={language}
-              onChange={(e) => setLanguage(e.target.value)}
+              value={i18n.language}
+              onChange={(e) => changeLanguage(e.target.value)}
               className="language-select"
             >
               <option value="en">English</option>
@@ -207,16 +193,15 @@ const Topbar = () => {
             </select>
           </div>
 
-          {/* Notification Icon */}
+          {/* Notifications */}
           <div className="notification position-relative">
             <img
               src={bellIcon}
-              alt="Notifications"
+              alt={t("notifications")}
               className="bell-icon"
               style={{ cursor: "pointer" }}
               onClick={handleBellClick}
             />
-            {/* Notification count badge */}
             {notificationCount > 0 && (
               <span
                 className="position-absolute top-0 start-100 translate-middle"
@@ -247,7 +232,6 @@ const Topbar = () => {
                   fontSize: "0.85rem",
                 }}
               >
-                {/* Clear All Button */}
                 {notifications.length > 0 && (
                   <div className="d-flex justify-content-end mb-2">
                     <button
@@ -255,7 +239,7 @@ const Topbar = () => {
                       className="btn btn-sm btn-outline-danger"
                       style={{ fontSize: "0.7rem", padding: "2px 6px" }}
                     >
-                      Clear All
+                      {t("clearAll")}
                     </button>
                   </div>
                 )}
@@ -275,18 +259,16 @@ const Topbar = () => {
                       <strong style={{ display: "block", fontSize: "0.9rem" }}>
                         {n.userId?.fullName || "Unknown User"}
                       </strong>
-
                       <span style={{ display: "block", fontWeight: 500 }}>
                         {n.title}
                       </span>
-
                       <small className="text-muted">
                         {new Date(n.createdAt).toLocaleString()}
                       </small>
                     </div>
                   ))
                 ) : (
-                  <p>No notifications</p>
+                  <p>{t("noNotifications")}</p>
                 )}
               </div>
             )}
@@ -320,7 +302,7 @@ const Topbar = () => {
                   className="btn btn-sm btn-outline w-100"
                   onClick={handleLogout}
                 >
-                  Logout
+                  {t("logout")}
                 </button>
               </div>
             )}
