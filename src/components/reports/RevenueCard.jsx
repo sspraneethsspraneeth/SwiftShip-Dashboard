@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import revenueImg from "../../assets/icons/dollar.png";
 import "../../styles/ui/report.css";
-import BASE_URL from "../../utils/apiConfig";
+import axiosInstance from "../../utils/axiosInterceptor";
 
 
 const RevenueCard = () => {
@@ -11,7 +10,7 @@ const RevenueCard = () => {
 
   const fetchRevenue = async () => {
     try {
-      const res = await axios.get(`${BASE_URL}/transactions/monthly-revenue`);
+      const res = await axiosInstance.get("/transactions/monthly-revenue");
       setCurrentRevenue(res.data.currentMonthRevenue || 0);
       setLastRevenue(res.data.lastMonthRevenue || 0);
     } catch (error) {

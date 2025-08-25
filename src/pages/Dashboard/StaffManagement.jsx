@@ -3,8 +3,7 @@ import { useNavigate } from "react-router-dom";
 import AddNewStaffModal from "../../components/staff/AddNewStaffModal";
 import AssignNewTaskModal from "../../components/staff/AssignNewTaskModal";
 import "../../styles/ui/staff.css";
-import BASE_URL from "../../utils/apiConfig";
-
+import axiosInstance from "../../utils/axiosInterceptor";
 
 const StaffManagement = () => {
   const navigate = useNavigate();
@@ -19,11 +18,17 @@ const StaffManagement = () => {
   const [editStaff, setEditStaff] = useState(null);
   const menuRef = useRef();
 
+  // Fetch all staff
   useEffect(() => {
-    fetch(`${BASE_URL}/staff/all`)
-      .then(res => res.json())
-      .then(data => setStaffData(data))
-      .catch(err => console.error("Error fetching staff:", err));
+    const loadStaff = async () => {
+      try {
+        const res = await axiosInstance.get("/staff/all");
+        setStaffData(res.data);
+      } catch (err) {
+        console.error("Error fetching staff:", err);
+      }
+    };
+    loadStaff();
   }, []);
 
   const totalPages = Math.ceil(staffData.length / rowsPerPage);
@@ -60,20 +65,18 @@ const StaffManagement = () => {
 
   const handleRowClick = (staff) => {
     navigate(`/dashboard/staff/${encodeURIComponent(staff.fullName)}`, { state: { staff } });
-    
   };
 
-  const handleDelete = (e, id) => {
+  // Delete staff
+  const handleDelete = async (e, id) => {
     e.stopPropagation();
     if (window.confirm("Are you sure you want to delete this staff?")) {
-      fetch(`${BASE_URL}/staff/delete/${id}`, {
-        method: "DELETE",
-      })
-        .then(res => res.json())
-        .then(() => {
-          setStaffData(prev => prev.filter(s => s._id !== id));
-        })
-        .catch(err => console.error("Delete error:", err));
+      try {
+        await axiosInstance.delete(`/staff/delete/${id}`);
+        setStaffData(prev => prev.filter(s => s._id !== id));
+      } catch (err) {
+        console.error("Delete error:", err);
+      }
     }
   };
 
@@ -152,25 +155,22 @@ const StaffManagement = () => {
                   <td>
                     <span
                       className={`badge clickable ${staff.attendance === "Absent" ? "bg-danger" : "bg-success"}`}
-                      onClick={(e) => {
+                      onClick={async (e) => {
                         e.stopPropagation();
                         const newStatus = staff.attendance === "Absent" ? "Present" : "Absent";
-                        fetch(`${BASE_URL}/staff/update/${staff._id}`, {
-                          method: "PUT",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({ attendance: newStatus }),
-                        })
-                          .then((res) => res.json())
-                          .then((data) => {
-                            if (data.staff) {
-                              setStaffData((prev) =>
-                                prev.map((s) =>
-                                  s._id === data.staff._id ? { ...s, attendance: data.staff.attendance } : s
-                                )
-                              );
-                            }
-                          })
-                          .catch((err) => console.error("Failed to update attendance:", err));
+                        try {
+                          const res = await axiosInstance.put(`/staff/update/${staff._id}`, { attendance: newStatus });
+                          const updatedStaff = res.data.staff;
+                          if (updatedStaff) {
+                            setStaffData(prev =>
+                              prev.map(s =>
+                                s._id === updatedStaff._id ? { ...s, attendance: updatedStaff.attendance } : s
+                              )
+                            );
+                          }
+                        } catch (err) {
+                          console.error("Failed to update attendance:", err);
+                        }
                       }}
                     >
                       {staff.attendance || "Present"}
@@ -320,19 +320,15 @@ const StaffManagement = () => {
               <button className="btn cancel-btn" onClick={() => setEditStaff(null)}>Cancel</button>
               <button
                 className="btn save-btn"
-                onClick={() => {
-                  fetch(`${BASE_URL}/staff/update/${editStaff._id}`, {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(editStaff),
-                  })
-                    .then((res) => res.json())
-                    .then((data) => {
-                      if (data.staff) {
-                        handleSaveEdit(data.staff);
-                      }
-                    })
-                    .catch(() => alert("Update failed"));
+                onClick={async () => {
+                  try {
+                    const res = await axiosInstance.put(`/staff/update/${editStaff._id}`, editStaff);
+                    if (res.data.staff) {
+                      handleSaveEdit(res.data.staff);
+                    }
+                  } catch {
+                    alert("Update failed");
+                  }
                 }}
               >
                 Save

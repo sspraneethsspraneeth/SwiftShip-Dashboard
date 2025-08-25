@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import "../../styles/ui/dashboard/DashboardPage.css";
 import truckBlue from "../../assets/icons/truck.png";
 import greenArrow from "../../assets/icons/green-arrow.png";
-import axios from "axios";
-import BASE_URL from "../../utils/apiConfig";
+import axiosInstance from "../../utils/axiosInterceptor";
+
 
 
 const TotalShipmentsCard = () => {
@@ -13,7 +13,7 @@ const TotalShipmentsCard = () => {
   useEffect(() => {
     const fetchMetrics = async () => {
       try {
-        const res = await axios.get(`${BASE_URL}/shipment/metrics`);
+        const res = await axiosInstance.get("/shipment/metrics");
         setTotal(res.data.total);
         setGrowth(res.data.monthGrowth);
       } catch (error) {

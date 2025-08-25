@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import truckIcon from "../../assets/icons/truck.png";
 import "../../styles/ui/FleetCards.css";
-import axios from "axios";
-import BASE_URL from "../../utils/apiConfig";
+import axiosInstance from "../../utils/axiosInterceptor";
+
 
 
 const TotalVehiclesCard = () => {
@@ -11,7 +11,7 @@ const TotalVehiclesCard = () => {
   useEffect(() => {
     const fetchVehicleCount = async () => {
       try {
-        const res = await axios.get(`${BASE_URL}/fleet/all`);
+        const res = await axiosInstance.get("/fleet/all");
         setTotalVehicles(res.data.length); // Count of vehicles
       } catch (err) {
         console.error("Failed to fetch vehicle count:", err);

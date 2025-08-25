@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AddWarehouseModal from "../../components/warehouse/AddWarehouseModal";
 import "../../styles/ui/transaction.css";
-import BASE_URL from "../../utils/apiConfig";
+import axiosInstance from "../../utils/axiosInterceptor"; 
 
 
 const Warehouse = () => {
@@ -17,11 +17,11 @@ const Warehouse = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`${BASE_URL}/warehouse/all`)
-      .then(res => res.json())
-      .then(data => setWarehouses(data))
-      .catch(err => console.error("Fetch error:", err));
-  }, []);
+  axiosInstance.get("/warehouse/all")
+    .then(res => setWarehouses(res.data))
+    .catch(err => console.error("Fetch error:", err));
+}, []);
+
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -48,13 +48,12 @@ const Warehouse = () => {
 
   const handleDelete = (warehouse) => {
     if (window.confirm(`Are you sure you want to delete ${warehouse.name}?`)) {
-      fetch(`${BASE_URL}/warehouse/delete/${warehouse._id}`, {
-        method: "DELETE"
-      })
-        .then(() => {
-          setWarehouses(prev => prev.filter(w => w._id !== warehouse._id));
-        })
-        .catch(err => console.error("Delete error:", err));
+      axiosInstance.delete(`/warehouse/delete/${warehouse._id}`)
+  .then(() => {
+    setWarehouses(prev => prev.filter(w => w._id !== warehouse._id));
+  })
+  .catch(err => console.error("Delete error:", err));
+
     }
   };
 

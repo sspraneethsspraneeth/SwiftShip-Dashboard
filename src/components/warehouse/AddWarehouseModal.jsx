@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Modal, Button, Form, Row, Col } from "react-bootstrap";
 import "../../styles/ui/WarehouseDetails.css";
-import BASE_URL from "../../utils/apiConfig";
+import axiosInstance from "../../utils/axiosInterceptor";
 
 
 const AddWarehouseModal = ({ show, handleClose, onWarehouseAdded }) => {
@@ -34,28 +34,27 @@ const AddWarehouseModal = ({ show, handleClose, onWarehouseAdded }) => {
 
     setLoading(true);
     try {
-      const response = await fetch(`${BASE_URL}/warehouse/add`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
+      try {
+  const response = await axiosInstance.post("/warehouse/add", form);
+  const data = response.data;
 
-      const data = await response.json();
+  alert("✅ Warehouse added successfully!");
+  if (onWarehouseAdded) onWarehouseAdded(data.warehouse); // 🚀 Send back to parent
+  handleClose();
+  setForm({
+    name: "",
+    capacity: "",
+    spaceUsed: "",
+    location: "",
+    status: "Active",
+  });
+} catch (err) {
+  console.error("Add warehouse error:", err);
+  alert(err.response?.data?.message || "❌ Server error");
+} finally {
+  setLoading(false);
+}
 
-      if (response.ok) {
-        alert("✅ Warehouse added successfully!");
-        if (onWarehouseAdded) onWarehouseAdded(data.warehouse); // 🚀 Send back to parent
-        handleClose();
-        setForm({
-          name: "",
-          capacity: "",
-          spaceUsed: "",
-          location: "",
-          status: "Active",
-        });
-      } else {
-        alert(data.message || "❌ Failed to add warehouse");
-      }
     } catch (err) {
       console.error("Add warehouse error:", err);
       alert("❌ Server error");

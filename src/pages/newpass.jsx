@@ -11,7 +11,7 @@ import rightSideImage from "../assets/bg5.png";
 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import BASE_URL from "../utils/apiConfig";
+import axiosInstance from "../utils/axiosInterceptor";
 
 
 const NewPassPage = () => {
@@ -56,28 +56,24 @@ const NewPassPage = () => {
 
     setLoading(true);
     try {
-      const res = await fetch(`${BASE_URL}/reset-password`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, newPassword: password }),
+      // ✅ Use axiosInstance instead of fetch
+      const { data } = await axiosInstance.post("/reset-password", {
+        email,
+        newPassword: password,
       });
 
-      const data = await res.json();
-
-      if (res.ok) {
-        toast.success("Password updated successfully!", {
-          onClose: () => navigate("/congratulations"),
-          autoClose: 3000,
-        });
-      } else {
-        setError(data.message || "Failed to reset password.");
-      }
-    } catch (error) {
-      setError("Server error: " + error.message);
+      toast.success("Password updated successfully!", {
+        onClose: () => navigate("/congratulations"),
+        autoClose: 3000,
+      });
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to reset password.");
     } finally {
       setLoading(false);
     }
   };
+
+
 
   return (
     <div className="auth-container container">

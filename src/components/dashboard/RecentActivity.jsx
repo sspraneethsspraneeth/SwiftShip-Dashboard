@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import dotsIcon from "../../assets/icons/dots.png";
 import "../../styles/ui/dashboard/DashboardPage.css";
-import BASE_URL from "../../utils/apiConfig";
+import axiosInstance from "../../utils/axiosInterceptor";
 
 
 const getStatusBadge = (status) => {
@@ -25,7 +24,7 @@ const RecentActivity = () => {
   useEffect(() => {
     const fetchDriverName = async (origin, destination) => {
       try {
-        const res = await axios.get(`${BASE_URL}/staff/driver-by-route`, {
+        const res = await axiosInstance.get("/staff/driver-by-route", {
           params: { origin, destination },
         });
         return res.data.driverName || "Unassigned";
@@ -36,7 +35,7 @@ const RecentActivity = () => {
 
     const fetchShipments = async () => {
       try {
-        const res = await axios.get(`${BASE_URL}/shipment`);
+        const res = await axiosInstance.get("/shipment");
         const processed = await Promise.all(
           res.data.map(async (shipment) => {
             const driverName = await fetchDriverName(shipment.start, shipment.end);

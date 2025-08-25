@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Form, Row, Col } from "react-bootstrap";
-import BASE_URL from "../../utils/apiConfig";
-
+import axiosInstance from "../../utils/axiosInterceptor";
 
 const AddTrackingModal = ({ show, handleClose, handleAdd }) => {
   const [tracking, setTracking] = useState({
@@ -17,15 +16,18 @@ const AddTrackingModal = ({ show, handleClose, handleAdd }) => {
 
   useEffect(() => {
     if (show) {
-      fetch(`${BASE_URL}/fleet/all`)
-        .then((res) => res.json())
-        .then((data) => setVehicles(data))
-        .catch((err) => console.error("Error fetching vehicles:", err));
+      const fetchData = async () => {
+        try {
+          const vehicleRes = await axiosInstance.get("/fleet/all");
+          setVehicles(vehicleRes.data);
 
-      fetch(`${BASE_URL}/warehouse/all`)
-        .then((res) => res.json())
-        .then((data) => setWarehouses(data))
-        .catch((err) => console.error("Error fetching warehouses:", err));
+          const warehouseRes = await axiosInstance.get("/warehouse/all");
+          setWarehouses(warehouseRes.data);
+        } catch (err) {
+          console.error("Error fetching vehicles or warehouses:", err);
+        }
+      };
+      fetchData();
     }
   }, [show]);
 
@@ -35,26 +37,21 @@ const AddTrackingModal = ({ show, handleClose, handleAdd }) => {
 
   const handleSubmit = async () => {
     try {
-      const response = await fetch(`${BASE_URL}/trackings`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(tracking),
-      });
+      const response = await axiosInstance.post("/trackings", tracking);
+      console.log("Server response:", response.data);
 
-      const data = await response.json();
-      console.log("Server response:", data);
-
-      if (response.ok) {
-        alert("Tracking saved successfully!");
-        if (handleAdd) handleAdd(data.tracking);
-        setTracking({ start: "", end: "", eta: "", distance: "", vehicle: "" });
-        handleClose();
-      } else {
-        alert("Failed to save tracking: " + (data.error || data.message || "Unknown error"));
-      }
+      alert("Tracking saved successfully!");
+      if (handleAdd) handleAdd(response.data.tracking);
+      setTracking({ start: "", end: "", eta: "", distance: "", vehicle: "" });
+      handleClose();
     } catch (error) {
       console.error("Error saving tracking:", error);
-      alert("An error occurred while saving the tracking: " + error.message);
+      alert(
+        "Failed to save tracking: " +
+          (error.response?.data?.error ||
+            error.response?.data?.message ||
+            error.message)
+      );
     }
   };
 
@@ -63,7 +60,11 @@ const AddTrackingModal = ({ show, handleClose, handleAdd }) => {
       <Modal.Body className="p-4">
         <div className="d-flex justify-content-between align-items-center mb-3">
           <h5 className="fw-bold mb-0">Add New Tracking</h5>
-          <Button variant="light" onClick={handleClose} className="rounded-circle px-2">
+          <Button
+            variant="light"
+            onClick={handleClose}
+            className="rounded-circle px-2"
+          >
             <i className="bi bi-x-lg"></i>
           </Button>
         </div>
@@ -137,7 +138,7 @@ const AddTrackingModal = ({ show, handleClose, handleAdd }) => {
             >
               <option value="">Select a Vehicle</option>
               {vehicles.map((veh) => (
-                <option key={veh._Type} value={veh.vehicleType}>
+                <option key={veh._id} value={veh.vehicleType}>
                   {veh.vehicleType} - {veh.vehicleType}
                 </option>
               ))}
@@ -150,7 +151,11 @@ const AddTrackingModal = ({ show, handleClose, handleAdd }) => {
             </Button>
             <Button
               onClick={handleSubmit}
-              style={{ backgroundColor: "#7b61ff", borderColor: "#7b61ff", color: "#fff" }}
+              style={{
+                backgroundColor: "#7b61ff",
+                borderColor: "#7b61ff",
+                color: "#fff",
+              }}
             >
               Save Tracking
             </Button>

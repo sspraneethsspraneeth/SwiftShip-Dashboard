@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -11,7 +10,7 @@ import {
   Filler,
   Legend,
 } from "chart.js";
-import BASE_URL from "../../utils/apiConfig";
+import axiosInstance from "../../utils/axiosInterceptor";
 
 
 ChartJS.register(
@@ -31,7 +30,7 @@ const RevenueGrowthChart = () => {
 
   const fetchRevenueData = async () => {
     try {
-      const res = await axios.get(`${BASE_URL}/transactions/monthly-revenue-breakdown`);
+      const res = await axiosInstance.get("/transactions/monthly-revenue-breakdown");
       if (res.data?.revenueByMonth) {
         setMonthlyRevenue(res.data.revenueByMonth);
       } else {

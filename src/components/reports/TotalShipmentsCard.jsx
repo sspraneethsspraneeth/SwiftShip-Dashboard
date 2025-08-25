@@ -1,9 +1,8 @@
 // src/components/reports/TotalShipmentsCard.jsx
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import shipmentImg from "../../assets/icons/truck.png";
 import "../../styles/ui/report.css";
-import BASE_URL from "../../utils/apiConfig";
+import axiosInstance from "../../utils/axiosInterceptor";
 
 
 const TotalShipmentsCard = () => {
@@ -13,7 +12,7 @@ const TotalShipmentsCard = () => {
   useEffect(() => {
     const fetchShipmentMetrics = async () => {
       try {
-        const response = await axios.get(`${BASE_URL}/shipment/metrics`);
+        const response = await axiosInstance.get("/shipment/metrics");
         setTotalShipments(response.data.total || 0);
         setGrowth(response.data.monthGrowth || 0);
       } catch (error) {

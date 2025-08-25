@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useLocation } from "react-router-dom";
-import axios from "axios";
 import EditShipmentModal from "../../components/shipments/EditShipmentModal";
 import AddNoteModal from "../../components/shipments/AddNoteModal";
 import Cancelshipment from "../../components/shipments/cancelshipment";
 import "../../styles/ui/transaction.css";
-import BASE_URL from "../../utils/apiConfig";
+import axiosInstance from "../../utils/axiosInterceptor";
 
 
 const ShipmentDetails = () => {
@@ -32,13 +31,13 @@ const ShipmentDetails = () => {
         if (location.state?.shipment) {
           shipmentData = location.state.shipment;
         } else {
-          const res = await axios.get(`${BASE_URL}/shipment/${id}`);
+          const res = await axiosInstance.get(`/shipment/${id}`);
           shipmentData = res.data;
         }
 
         if (shipmentData.driverName) {
           try {
-            const driverRes = await axios.get(`${BASE_URL}/staff/driver-by-name`, {
+            const driverRes = await axiosInstance.get("/staff/driver-by-name", {
               params: { name: shipmentData.driverName },
             });
 
@@ -120,7 +119,7 @@ const ShipmentDetails = () => {
     try {
       const orderId = shipment.orders[absoluteIndex]._id;
 
-      const res = await axios.post(`${BASE_URL}/shipment/update-order-status`, {
+      const res = await axiosInstance.post("/shipment/update-order-status", {
         orderId,
         newStatus,
       });

@@ -7,11 +7,11 @@ import InsuranceChart from "../../components/fleet/InsuranceChart";
 import AddVehicleModal from "../../components/fleet/AddVehicleModal";
 
 import "../../styles/ui/FleetPage.css";
-import BASE_URL from "../../utils/apiConfig";
+import axiosInstance from "../../utils/axiosInterceptor"; // ✅ use axiosInstance
 
 
 const VehicleDetailsPage = () => {
-  const { id } = useParams(); // vehicle _id from URL
+  const { id } = useParams();    
   const [vehicle, setVehicle] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -22,9 +22,8 @@ const VehicleDetailsPage = () => {
   useEffect(() => {
     const fetchVehicleDetails = async () => {
       try {
-        const res = await fetch(`${BASE_URL}/fleet/${id}`);
-        const data = await res.json();
-        setVehicle(data);
+        const res = await axiosInstance.get(`/fleet/${id}`);
+        setVehicle(res.data);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching vehicle details:", error);

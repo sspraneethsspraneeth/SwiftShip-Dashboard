@@ -13,8 +13,7 @@ import eyeHideIcon from "../assets/eyeopen.png"; // Use correct closed-eye icon 
 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import BASE_URL from "../utils/apiConfig";
-
+import axiosInstance from "../utils/axiosInterceptor";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -60,13 +59,11 @@ const RegisterPage = () => {
 
     setLoading(true);
     try {
-      const response = await fetch(`${BASE_URL}/request-code`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, source: "register" }),
+      // ✅ Use axiosInstance instead of fetch
+      const { data } = await axiosInstance.post("/request-code", {
+        email,
+        source: "register",
       });
-
-      const data = await response.json();
 
       if (data.message === "User already exists") {
         toast.info("User already exists. Please log in instead.", {
@@ -76,21 +73,15 @@ const RegisterPage = () => {
         return;
       }
 
-      if (response.ok) {
-        toast.success("Verification code sent to your email!", {
-          onClose: () =>
-            navigate("/verification", {
-              state: { email, password, source: "register" },
-            }),
-          autoClose: 3000,
-        });
-      } else {
-        const msg = data.message || "Failed to send verification code.";
-        setError(msg);
-        toast.error(msg);
-      }
+      toast.success("Verification code sent to your email!", {
+        onClose: () =>
+          navigate("/verification", {
+            state: { email, password, source: "register" },
+          }),
+        autoClose: 3000,
+      });
     } catch (error) {
-      const msg = "Error sending verification code: " + error.message;
+      const msg = error.response?.data?.message || "Error sending verification code";
       setError(msg);
       toast.error(msg);
     } finally {

@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import FulfillmentModal from "../../components/order/FulfillmentModal";
 import "../../styles/ui/ordermanagement.css";
-import BASE_URL from "../../utils/apiConfig";
-
+import axiosInstance from "../../utils/axiosInterceptor";
 
 const CustomerInfo = () => {
   const { state } = useLocation();
@@ -19,32 +18,29 @@ const CustomerInfo = () => {
       if (!customer?.contact) return;
 
       try {
-const res = await fetch(`${BASE_URL}/orders/by-phone/${customer.contact}`);
-        const data = await res.json();
+        // ✅ Changed fetch to axiosInstance
+        const response = await axiosInstance.get(`/orders/by-phone/${customer.contact}`);
+        const data = response.data;
         console.log("Fetched orders by phone:", data);
 
-        if (res.ok) {
-          const mappedOrders = (data.orders || []).map(order => ({
-            ...order,
-            orderId: order.orderId || order._id,
-            date: new Date(order.createdAt).toLocaleDateString(),
-            amount: parseFloat(order.totalAmount) || 0,
-          }));
-          setItems(mappedOrders);
+        const mappedOrders = (data.orders || []).map(order => ({
+          ...order,
+          orderId: order.orderId || order._id,
+          date: new Date(order.createdAt).toLocaleDateString(),
+          amount: parseFloat(order.totalAmount) || 0,
+        }));
+        setItems(mappedOrders);
 
-          // FIX: If address is an object, extract its fields
-          if (data.user?.address) {
-            const addr = data.user.address;
-            if (typeof addr === "string") {
-              setAddress(addr);
-            } else if (typeof addr === "object") {
-              setAddress(`${addr.address || ''} (${addr.latitude}, ${addr.longitude})`);
-            }
-          } else {
-            setAddress("N/A");
+        // FIX: If address is an object, extract its fields
+        if (data.user?.address) {
+          const addr = data.user.address;
+          if (typeof addr === "string") {
+            setAddress(addr);
+          } else if (typeof addr === "object") {
+            setAddress(`${addr.address || ''} (${addr.latitude}, ${addr.longitude})`);
           }
         } else {
-          console.error("Failed to fetch orders by phone:", data.message);
+          setAddress("N/A");
         }
       } catch (err) {
         console.error("Fetch error:", err);
@@ -144,7 +140,6 @@ const res = await fetch(`${BASE_URL}/orders/by-phone/${customer.contact}`);
               <td>
                 <span className="badge bg-light-success text-success border border-success">
                  {"Delivered"}
-
                 </span>
               </td>
               <td className="position-relative">

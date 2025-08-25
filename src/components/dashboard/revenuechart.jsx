@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -12,7 +11,7 @@ import {
 } from "chart.js";
 
 import "../../styles/ui/dashboard/DashboardPage.css";
-import BASE_URL from "../../utils/apiConfig";
+import axiosInstance from "../../utils/axiosInterceptor";
 
 
 ChartJS.register(
@@ -31,7 +30,7 @@ const RevenueChart = () => {
   useEffect(() => {
     const fetchRevenue = async () => {
       try {
-        const res = await axios.get(`${BASE_URL}/transactions/monthly-revenue-breakdown`);
+        const res = await axiosInstance.get("/transactions/monthly-revenue-breakdown");
         const revenue = res.data.revenueByMonth || [];
 
         setMonthlyRevenue(revenue);

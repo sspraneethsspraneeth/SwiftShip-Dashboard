@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import maintenanceIcon from "../../assets/icons/truck-time.png";
 import "../../styles/ui/FleetCards.css";
-import axios from "axios";
-import BASE_URL from "../../utils/apiConfig";
+import axiosInstance from "../../utils/axiosInterceptor";
 
 
 const MaintenanceCard = () => {
@@ -11,7 +10,7 @@ const MaintenanceCard = () => {
   useEffect(() => {
     const fetchVehicles = async () => {
       try {
-        const response = await axios.get(`${BASE_URL}/fleet/all`);
+        const response = await axiosInstance.get("/fleet/all");
         const vehicles = response.data || [];
 
         const maintenanceVehicles = vehicles.filter(

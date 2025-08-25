@@ -3,8 +3,8 @@ import "../../styles/ui/dashboard/DashboardPage.css";
 import boxOrange from "../../assets/icons/boxex.png";
 import greenArrow from "../../assets/icons/green-arrow.png";
 import redArrow from "../../assets/icons/red-arrow.png";
-import axios from "axios";
-import BASE_URL from "../../utils/apiConfig";
+import axiosInstance from "../../utils/axiosInterceptor";
+
 
 
 const PendingDeliveriesCard = () => {
@@ -14,7 +14,7 @@ const PendingDeliveriesCard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await axios.get(`${BASE_URL}/deliveries/stats`);
+        const res = await axiosInstance.get("/deliveries/stats");
         setTotal(res.data.totalPendingDeliveries);
         setGrowth(res.data.growth);
       } catch (error) {

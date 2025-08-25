@@ -14,7 +14,7 @@ import searchIcon from "../../assets/icons/icon.png";
 
 import "../../styles/ui/FleetPage.css";
 import "../../styles/ui/FleetCards.css";
-import BASE_URL from "../../utils/apiConfig";
+import axiosInstance from "../../utils/axiosInterceptor";
 
 
 const getStatusBadgeClass = (status) => {
@@ -48,11 +48,16 @@ const FleetManagementPage = () => {
   const handleClose = () => setShowModal(false);
 
   useEffect(() => {
-    fetch(`${BASE_URL}/fleet/all`)
-      .then((res) => res.json())
-      .then((data) => setFleetData(data))
-      .catch((err) => console.error("Error fetching fleet data:", err));
-  }, []);
+  const fetchFleetData = async () => {
+    try {
+      const res = await axiosInstance.get("/fleet/all");
+      setFleetData(res.data);
+    } catch (err) {
+      console.error("Error fetching fleet data:", err);
+    }
+  };
+  fetchFleetData();
+}, []);
 
   const filteredData = fleetData.filter((vehicle) =>
     vehicle.vehicleId?.toLowerCase().includes(searchTerm.toLowerCase()) ||

@@ -1,7 +1,7 @@
 // src/components/settings/AddRoleModal.jsx
 import React, { useState } from 'react';
 import '../../styles/ui/UserRoleSection.css';
-import BASE_URL from "../../utils/apiConfig";
+import axiosInstance from "../../utils/axiosInterceptor";
 
 
 const PERMISSIONS = [
@@ -32,39 +32,35 @@ const AddRoleModal = ({ onClose, onSave }) => {
   };
 
   const handleSubmit = async () => {
-    if (!roleName.trim()) {
-      alert('Role name is required');
-      return;
-    }
+  if (!roleName.trim()) {
+    alert("Role name is required");
+    return;
+  }
 
-    const newRole = {
-      role: roleName,
-      description,
-      permissions: selectedPermissions,
-    };
-
-    try {
-      setLoading(true);
-      const res = await fetch(`${BASE_URL}/roles`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newRole),
-      });
-
-      if (!res.ok) {
-        throw new Error('Failed to create role');
-      }
-
-      const savedRole = await res.json();
-      onSave(savedRole); // Update parent state with new role
-      onClose();
-    } catch (err) {
-      console.error(err);
-      alert('Error creating role: ' + err.message);
-    } finally {
-      setLoading(false);
-    }
+  const newRole = {
+    role: roleName,
+    description,
+    permissions: selectedPermissions,
   };
+
+  try {
+    setLoading(true);
+    const res = await axiosInstance.post("/roles", newRole);
+    const savedRole = res.data;
+
+    onSave(savedRole); // Update parent state with new role
+    onClose();
+  } catch (err) {
+    console.error(err);
+    alert(
+      "Error creating role: " +
+        (err.response?.data?.error || err.response?.data?.message || err.message)
+    );
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="modal-overlay">

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Bar } from "react-chartjs-2";
-import axios from "axios";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -10,7 +9,7 @@ import {
   Legend,
 } from "chart.js";
 import "../../styles/ui/report.css";
-import BASE_URL from "../../utils/apiConfig";
+import axiosInstance from "../../utils/axiosInterceptor";
 
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
@@ -26,8 +25,7 @@ const TotalDeliveriesChart = () => {
   useEffect(() => {
     const fetchChartData = async () => {
       try {
-        const res = await axios.get(
-          `${BASE_URL}/deliveries/chart-stats?range=${range.toLowerCase()}`
+        const res = await await axiosInstance.get("/deliveries/chart-stats?range=${range.toLowerCase()}"
         );
         setChartData(res.data);
       } catch (err) {

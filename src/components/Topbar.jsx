@@ -3,11 +3,13 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import io from "socket.io-client";
 import "../styles/ui/Topbar.css";
+
 import globeIcon from "../assets/icons/us.png";
 import bellIcon from "../assets/icons/bell.png";
 import defaultAvatar from "../assets/icons/default-avatar.png";
-import BASE_URL from "../utils/apiConfig";
-import SOCKET_IO_URL from "../utils/apiConfig";
+
+import { SOCKET_IO_URL } from "../utils/apiConfig";
+import axiosInstance from "../utils/axiosInterceptor";
 
 // Socket.IO connection
 const socket = io(SOCKET_IO_URL, {
@@ -39,21 +41,15 @@ const Topbar = () => {
   // Fetch user info
   useEffect(() => {
     const fetchUser = async () => {
-      const token = localStorage.getItem("token");
       const email = localStorage.getItem("email");
-      if (!token || !email) return;
+      if (!email) return;
 
       try {
-        const res = await fetch(`${BASE_URL}/user?email=${email}`, {
-          headers: { Authorization: `Bearer ${token}` },
+        const res = await axiosInstance.get(`/user?email=${email}`);
+        setUser({
+          fullName: res.data.user.fullName || "User",
+          image: res.data.user.image || null,
         });
-        const data = await res.json();
-        if (res.ok) {
-          setUser({
-            fullName: data.user.fullName || "User",
-            image: data.user.image || null,
-          });
-        }
       } catch (err) {
         console.error("Error fetching user:", err);
       }
@@ -63,17 +59,11 @@ const Topbar = () => {
 
   // Fetch notifications
   const fetchNotifications = async () => {
-    const token = localStorage.getItem("token");
     try {
       setLoadingNotifications(true);
-      const res = await fetch(`${BASE_URL}/notifications`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setNotifications(data);
-        setNotificationCount(data.length);
-      }
+      const res = await axiosInstance.get("/notifications");
+      setNotifications(res.data);
+      setNotificationCount(res.data.length);
     } catch (err) {
       console.error("Error fetching notifications:", err);
     } finally {
@@ -97,12 +87,8 @@ const Topbar = () => {
   }, []);
 
   const handleClearAll = async () => {
-    const token = localStorage.getItem("token");
     try {
-      await fetch(`${BASE_URL}/notifications/clear-all`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axiosInstance.delete("/notifications/clear-all");
       setNotifications([]);
       setNotificationCount(0);
     } catch (err) {
@@ -115,12 +101,8 @@ const Topbar = () => {
   };
 
   const handleLogout = async () => {
-    const token = localStorage.getItem("token");
     try {
-      await fetch(`${BASE_URL}/logout`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axiosInstance.post("/logout");
     } catch (err) {
       console.error("Logout failed", err);
     }

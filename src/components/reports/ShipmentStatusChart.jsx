@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Doughnut } from "react-chartjs-2";
-import axios from "axios";
 import {
   Chart as ChartJS,
   ArcElement,
@@ -8,7 +7,7 @@ import {
   Legend,
 } from "chart.js";
 import "../../styles/ui/report.css";
-import BASE_URL from "../../utils/apiConfig";
+import axiosInstance from "../../utils/axiosInterceptor";
 
 
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -41,7 +40,7 @@ const ShipmentStatusChart = () => {
   useEffect(() => {
     const fetchStatusBreakdown = async () => {
       try {
-        const res = await axios.get(`${BASE_URL}/shipment/status-breakdown`);
+        const res = await axiosInstance.get("/shipment/status-breakdown");
         setStatusCounts(res.data);
       } catch (err) {
         console.error("Failed to fetch status breakdown:", err);

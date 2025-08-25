@@ -1,7 +1,6 @@
 // src/components/settings/CompanyInfoSection.jsx
 import React, { useState } from 'react';
-import axios from 'axios';
-import BASE_URL from "../../utils/apiConfig";
+import axiosInstance from "../../utils/axiosInterceptor";
 
 
 const CompanyInfoSection = () => {
@@ -54,7 +53,7 @@ const CompanyInfoSection = () => {
       formData.append('timezone', preferences.timezone);
       formData.append('language', preferences.language);
 
-      await axios.post(`${BASE_URL}/company-info`, formData, {
+      await axiosInstance.post("/company-info", formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 

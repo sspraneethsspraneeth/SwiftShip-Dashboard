@@ -3,8 +3,8 @@ import "../../styles/ui/dashboard/DashboardPage.css";
 import truckPink from "../../assets/icons/checkmark.png";
 import greenArrow from "../../assets/icons/green-arrow.png";
 import redArrow from "../../assets/icons/red-arrow.png";
-import axios from "axios";
-import BASE_URL from "../../utils/apiConfig";
+import axiosInstance from "../../utils/axiosInterceptor";
+
 
 
 const DeliveredCard = () => {
@@ -14,7 +14,8 @@ const DeliveredCard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await axios.get(`${BASE_URL}/deliveries/delivered-stats`);
+        const res = await axiosInstance.get("/deliveries/delivered-stats");
+
         setTotal(res.data.totalDelivered);
         setGrowth(res.data.growth);
       } catch (error) {

@@ -9,8 +9,7 @@ import {
   Form,
 } from "react-bootstrap";
 import "../../styles/ui/WarehouseDetails.css";
-import BASE_URL from "../../utils/apiConfig";
-
+import axiosInstance from "../../utils/axiosInterceptor"; // ✅ use interceptor
 
 const WarehouseDetails = () => {
   const { id: warehouseId } = useParams();
@@ -32,17 +31,17 @@ const WarehouseDetails = () => {
 
   // Fetch assigned staff
   useEffect(() => {
-    fetch(`${BASE_URL}/warehouse-staff/${warehouseId}`)
-      .then((res) => res.json())
-      .then((data) => setAssignedStaff(data))
+    axiosInstance
+      .get(`/warehouse-staff/${warehouseId}`)
+      .then((res) => setAssignedStaff(res.data))
       .catch((err) => console.error("Fetch assigned staff failed:", err));
   }, [warehouseId]);
 
   // Fetch all staff
   useEffect(() => {
-    fetch(`${BASE_URL}/staff/all`)
-      .then((res) => res.json())
-      .then((data) => setAllStaff(data)) // include all, including drivers
+    axiosInstance
+      .get("/staff/all")
+      .then((res) => setAllStaff(res.data))
       .catch((err) => console.error("Fetch all staff failed:", err));
   }, []);
 
@@ -58,26 +57,24 @@ const WarehouseDetails = () => {
       warehouseName: warehouse.name,
     };
 
-    fetch(`${BASE_URL}/warehouse-staff/assign`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    })
+    axiosInstance
+      .post("/warehouse-staff/assign", payload)
       .then((res) => {
-        if (res.status === 409) {
+        setAssignedStaff((prev) => [...prev, res.data]);
+      })
+      .catch((err) => {
+        if (err.response?.status === 409) {
           alert("Staff is already assigned to another warehouse");
-          return;
+        } else {
+          console.error("Assign failed:", err);
         }
-        return res.json();
-      })
-      .then((data) => {
-        if (data) setAssignedStaff((prev) => [...prev, data]);
-      })
-      .catch((err) => console.error("Assign failed:", err));
+      });
   };
 
   const handleSelectAll = (e) => {
-    setSelectedStaff(e.target.checked ? assignedStaff.map((s) => s.staffId) : []);
+    setSelectedStaff(
+      e.target.checked ? assignedStaff.map((s) => s.staffId) : []
+    );
   };
 
   const handleCheckboxChange = (staffId) => {
@@ -90,28 +87,26 @@ const WarehouseDetails = () => {
 
   const handleDelete = (assignmentId) => {
     if (window.confirm("Unassign this staff?")) {
-      fetch(`${BASE_URL}/warehouse-staff/delete/${assignmentId}`, {
-        method: "DELETE",
-      })
-        .then((res) => res.json())
+      axiosInstance
+        .delete(`/warehouse-staff/delete/${assignmentId}`)
         .then(() => {
-          setAssignedStaff((prev) => prev.filter((s) => s._id !== assignmentId));
-          setSelectedStaff((prev) => prev.filter((id) => id !== assignmentId));
+          setAssignedStaff((prev) =>
+            prev.filter((s) => s._id !== assignmentId)
+          );
+          setSelectedStaff((prev) =>
+            prev.filter((id) => id !== assignmentId)
+          );
         })
         .catch((err) => console.error("Delete failed:", err));
     }
   };
 
   const handleEditSubmit = () => {
-    fetch(`${BASE_URL}/warehouse-staff/update/${editStaff._id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(editStaff),
-    })
-      .then((res) => res.json())
-      .then((data) => {
+    axiosInstance
+      .put(`/warehouse-staff/update/${editStaff._id}`, editStaff)
+      .then((res) => {
         setAssignedStaff((prev) =>
-          prev.map((s) => (s._id === data._id ? data : s))
+          prev.map((s) => (s._id === res.data._id ? res.data : s))
         );
         setEditStaff(null);
       })

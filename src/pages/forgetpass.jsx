@@ -9,7 +9,7 @@ import emailIcon from "../assets/email.png";
 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import BASE_URL from "../utils/apiConfig";
+import axiosInstance from "../utils/axiosInterceptor";
 
 
 const ForgetPassPage = () => {
@@ -26,32 +26,24 @@ const ForgetPassPage = () => {
     setLoading(true);
 
     try {
-      const response = await fetch(`${BASE_URL}/request-code`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
+  const { data } = await axiosInstance.post("/request-code", { email });
 
-      const data = await response.json();
+  // Show success toast and navigate
+  toast.success("Verification code sent to your email!", {
+    onClose: () => {
+      navigate("/verification", { state: { email, source: "forgot" } });
+    },
+    autoClose: 3000,
+  });
+} catch (error) {
+  // Axios error handling
+  toast.error(
+    error.response?.data?.message || "Email not found or failed to send code."
+  );
+} finally {
+  setLoading(false);
+}
 
-      if (response.ok) {
-        // Show success toast and navigate after it's closed
-        toast.success("Verification code sent to your email!", {
-          onClose: () => {
-            navigate("/verification", {
-              state: { email, source: "forgot" },
-            });
-          },
-          autoClose: 3000, // close after 3 seconds
-        });
-      } else {
-        toast.error(data.message || "Email not found or failed to send code.");
-      }
-    } catch (error) {
-      toast.error("Error: " + error.message);
-    } finally {
-      setLoading(false);
-    }
   };
 
   return (

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "../../styles/ui/RoutePlanning.css";
 import { Button } from "react-bootstrap";
 import AddRouteModal from "../../components/route/AddRouteModel";
-import BASE_URL from "../../utils/apiConfig";
+import axiosInstance from "../../utils/axiosInterceptor";
 
 
 
@@ -14,28 +14,32 @@ const RoutePlanning = () => {
     const [loadingRoutes, setLoadingRoutes] = useState(true);
 
 
+
 useEffect(() => {
-  fetch(`${BASE_URL}/trackings`)
-    .then((res) => res.json())
-    .then((data) => {
-      const mappedData = data.map((item) => ({
+  const fetchRoutes = async () => {
+    try {
+      const res = await axiosInstance.get("/trackings");
+      const mappedData = res.data.map((item) => ({
         id: item.routeId,
         start: item.start,
         end: item.end,
         eta: item.eta,
         distance: item.distance + " miles",
-        stops: "3 stops (Atlanta, GA)", // Static
+        stops: "3 stops (Atlanta, GA)",
         vehicle: item.vehicle,
         tracking: `#${item.trackingId}`,
       }));
       setRoutes(mappedData);
-      setLoadingRoutes(false); // ✅ mark done
-    })
-    .catch((err) => {
+    } catch (err) {
       console.error("Failed to fetch tracking data", err);
+    } finally {
       setLoadingRoutes(false);
-    });
+    }
+  };
+
+  fetchRoutes();
 }, []);
+
 
 
   const handleRowSelect = (route) => setSelectedRoute(route);

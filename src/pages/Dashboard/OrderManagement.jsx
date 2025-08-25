@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../styles/ui/ordermanagement.css";
-import BASE_URL from "../../utils/apiConfig";
+import axiosInstance from "../../utils/axiosInterceptor";
 
 
 const OrderManagement = () => {
@@ -18,9 +18,8 @@ const OrderManagement = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const res = await fetch(`${BASE_URL}/orders`);
-        const data = await res.json();
-        setOrderList(data.orders || data || []);
+        const res = await axiosInstance.get("/orders");
+setOrderList(res.data.orders || res.data || []);
       } catch (err) {
         console.error("Failed to fetch orders:", err);
       } finally {
@@ -30,9 +29,8 @@ const OrderManagement = () => {
 
     const fetchTransactions = async () => {
       try {
-        const res = await fetch(`${BASE_URL}/transactions/all`);
-        const data = await res.json();
-        setTransactions(data || []);
+       const res = await axiosInstance.get("/transactions/all");
+      setTransactions(res.data || []);
       } catch (err) {
         console.error("Failed to fetch transactions:", err);
       }
@@ -97,7 +95,7 @@ const OrderManagement = () => {
     if (newCustomer && newCustomer.trim()) {
       setOrderList((prev) =>
         prev.map((o) =>
-          o.orderId === order.orderId || o._id === order._id
+          (o.orderId === order.orderId || o._id === order._id)
             ? { ...o, customer: newCustomer }
             : o
         )

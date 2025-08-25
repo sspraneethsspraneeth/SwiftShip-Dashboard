@@ -4,7 +4,7 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import "../../styles/ui/transaction.css";
-import BASE_URL from "../../utils/apiConfig";
+import axiosInstance from "../../utils/axiosInterceptor";
 
 
 const Transactions = () => {
@@ -20,9 +20,8 @@ const Transactions = () => {
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
-        const response = await fetch(`${BASE_URL}/transactions/all`);
-        const data = await response.json();
-        setTransactions(data);
+        const response = await axiosInstance.get("/transactions/all");
+        setTransactions(response.data);
       } catch (error) {
         console.error("Error fetching transactions:", error);
       }

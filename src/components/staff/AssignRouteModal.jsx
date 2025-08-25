@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import BASE_URL from "../../utils/apiConfig";
+import axiosInstance from "../../utils/axiosInterceptor";
 
 const AssignRouteModal = ({ show, handleClose, staffId, handleAddRoute }) => {
   const [routes, setRoutes] = useState([]);
@@ -18,20 +18,21 @@ const AssignRouteModal = ({ show, handleClose, staffId, handleAddRoute }) => {
   // Fetch routes when modal is shown
   useEffect(() => {
     if (show) {
-      fetch(`${BASE_URL}/trackings`)
-        .then((res) => res.json())
-        .then((data) => {
-          const mappedRoutes = data.map((item) => ({
-            id: item.routeId,
-            start: item.start,
-            end: item.end,
-            eta: item.eta,
-            distance: item.distance,
-            vehicle: item.vehicle,
-          }));
-          setRoutes(mappedRoutes);
-        })
-        .catch((err) => console.error("Failed to fetch routes:", err));
+      axiosInstance.get("/trackings")
+  .then((res) => {
+    const data = res.data;
+    const mappedRoutes = data.map((item) => ({
+      id: item.routeId,
+      start: item.start,
+      end: item.end,
+      eta: item.eta,
+      distance: item.distance,
+      vehicle: item.vehicle,
+    }));
+    setRoutes(mappedRoutes);
+  })
+  .catch((err) => console.error("Failed to fetch routes:", err));
+
     }
   }, [show]);
 
@@ -70,36 +71,28 @@ const AssignRouteModal = ({ show, handleClose, staffId, handleAddRoute }) => {
 
     try {
       setLoading(true);
-      const response = await fetch(
-        `${BASE_URL}/staff/assign-task/${staffId}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(task),
-        }
-      );
+      const response = await axiosInstance.post(`/staff/assign-task/${staffId}`, task);
 
-      const data = await response.json();
+if (response.status === 200 || response.status === 201) {
+  const data = response.data;
+  toast.success("Route assigned successfully!");
+  handleAddRoute(data.route);
 
-      if (response.ok) {
-        toast.success("Route assigned successfully!");
-        handleAddRoute(data.route);
+  // Reset form
+  setRouteId("");
+  setPickup("");
+  setDelivery("");
+  setVehicle("");
+  setDate("");
+  setInstructions("");
+  setPackageDetails("");
 
-        // Reset form
-        setRouteId("");
-        setPickup("");
-        setDelivery("");
-        setVehicle("");
-        setDate("");
-        setInstructions("");
-        setPackageDetails("");
+  setTimeout(() => handleClose(), 1500);
+} else {
+  toast.error(response.data.message || "Failed to assign route.");
+}
 
-        setTimeout(() => handleClose(), 1500);
-      } else {
-        toast.error(data.message || "Failed to assign route.");
-      }
+      
     } catch (err) {
       toast.error("Server error. Please try again.");
     } finally {

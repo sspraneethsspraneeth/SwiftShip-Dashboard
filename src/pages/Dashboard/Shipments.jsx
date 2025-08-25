@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { useTranslation } from "react-i18next";
 import "../../styles/ui/ShipmentListPage.css";
-import BASE_URL from "../../utils/apiConfig";
+import axiosInstance from "../../utils/axiosInterceptor";
 
 const ShipmentsTable = () => {
   const { t } = useTranslation();
@@ -22,7 +21,7 @@ const ShipmentsTable = () => {
 
   const fetchDriverName = async (origin, destination) => {
     try {
-      const res = await axios.get(`${BASE_URL}/staff/driver-by-route`, {
+      const res = await axiosInstance.get("/staff/driver-by-route", {
         params: { origin, destination },
       });
       return res.data.driverName || "Unassigned";
@@ -33,7 +32,7 @@ const ShipmentsTable = () => {
 
   const fetchShipments = async () => {
     try {
-      const res = await axios.get(`${BASE_URL}/shipment`);
+      const res = await axiosInstance.get("/shipment");
 
       const processed = await Promise.all(
         res.data.map(async (shipment) => {
@@ -73,7 +72,7 @@ const ShipmentsTable = () => {
   const generateShipments = async () => {
     setLoading(true);
     try {
-      await axios.post(`${BASE_URL}/shipment/generate`);
+      await axiosInstance.post("/shipment/generate");
       await fetchShipments();
     } catch (err) {
       console.error("❌ Error generating shipments", err);

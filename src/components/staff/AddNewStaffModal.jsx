@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "../../styles/ui/staff.css";
-import BASE_URL from "../../utils/apiConfig";
-
+import axiosInstance from "../../utils/axiosInterceptor";
 
 const AddNewStaffModal = ({ onClose, onStaffAdded }) => {
   const [formData, setFormData] = useState({
@@ -23,15 +22,16 @@ const AddNewStaffModal = ({ onClose, onStaffAdded }) => {
 
   useEffect(() => {
     // Fetch warehouses to populate dropdown
-    fetch(`${BASE_URL}/warehouse/all`)
-      .then(res => res.json())
-      .then(data => {
+    axiosInstance
+      .get("/warehouse/all")
+      .then((res) => {
+        const data = res.data;
         setWarehouseOptions(data);
         if (data.length > 0 && !formData.warehouseName) {
-          setFormData(prev => ({ ...prev, warehouseName: data[0].name }));
+          setFormData((prev) => ({ ...prev, warehouseName: data[0].name }));
         }
       })
-      .catch(err => console.error("Failed to load warehouses", err));
+      .catch((err) => console.error("Failed to load warehouses", err));
   }, []);
 
   useEffect(() => {
@@ -103,15 +103,9 @@ const AddNewStaffModal = ({ onClose, onStaffAdded }) => {
     }
 
     try {
-      const response = await fetch(`${BASE_URL}/staff/add`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
+      const response = await axiosInstance.post("/staff/add", payload);
+      if (response.status === 200 || response.status === 201) {
+        const data = response.data;
         toast.success("Staff added successfully!");
         setFormData({
           profilePicture: "",
@@ -126,7 +120,7 @@ const AddNewStaffModal = ({ onClose, onStaffAdded }) => {
         onStaffAdded(data.staff);
         setTimeout(() => onClose(), 1500);
       } else {
-        toast.error(data.message || "Something went wrong.");
+        toast.error(response.data.message || "Something went wrong.");
       }
     } catch (err) {
       toast.error("Failed to connect to server.");

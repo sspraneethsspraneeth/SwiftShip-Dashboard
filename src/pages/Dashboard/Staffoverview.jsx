@@ -2,8 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import AssignRouteModal from "../../components/staff/AssignRouteModal";
 import "../../styles/ui/staff.css";
-import BASE_URL from "../../utils/apiConfig";
-
+import axiosInstance from "../../utils/axiosInterceptor";
 
 const StaffOverview = () => {
   const location = useLocation();
@@ -19,12 +18,17 @@ const StaffOverview = () => {
 
   // Fetch assigned routes
   useEffect(() => {
-    if (staffId && staff.role === "Driver") {
-      fetch(`${BASE_URL}/staff/${staffId}/tasks`)
-        .then((res) => res.json())
-        .then((data) => setAssignedRoutes(data.tasks || []))
-        .catch((err) => console.error("Error fetching tasks:", err));
-    }
+    const loadRoutes = async () => {
+      if (staffId && staff.role === "Driver") {
+        try {
+          const res = await axiosInstance.get(`/staff/${staffId}/tasks`);
+          setAssignedRoutes(res.data.tasks || []);
+        } catch (err) {
+          console.error("Error fetching tasks:", err);
+        }
+      }
+    };
+    loadRoutes();
   }, [staffId, staff.role]);
 
   const handleAddRoute = (newRoute) => {
@@ -42,35 +46,36 @@ const StaffOverview = () => {
     setMenuIndex(null);
   };
 
-  const handleSaveEdit = () => {
-    fetch(`${BASE_URL}/staff/${staffId}/update-task/${editRoute.routeId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(editRoute),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.route) {
-          setAssignedRoutes((prev) =>
-            prev.map((r) => (r.routeId === data.route.routeId ? data.route : r))
-          );
-          setEditRoute(null);
-        }
-      })
-      .catch(() => alert("Failed to update route"));
+  const handleSaveEdit = async () => {
+    try {
+      const res = await axiosInstance.put(
+        `/staff/${staffId}/update-task/${editRoute.routeId}`,
+        editRoute
+      );
+      if (res.data.route) {
+        setAssignedRoutes((prev) =>
+          prev.map((r) =>
+            r.routeId === res.data.route.routeId ? res.data.route : r
+          )
+        );
+        setEditRoute(null);
+      }
+    } catch {
+      alert("Failed to update route");
+    }
   };
 
-  const handleDelete = (routeId) => {
+  const handleDelete = async (routeId) => {
     if (window.confirm(`Are you sure you want to delete route ${routeId}?`)) {
-      fetch(`${BASE_URL}/staff/${staffId}/remove-task/${routeId}`, {
-        method: "DELETE",
-      })
-        .then((res) => res.json())
-        .then(() => {
-          setAssignedRoutes((prev) => prev.filter((r) => r.routeId !== routeId));
-          setSelectedRoutes((prev) => prev.filter((id) => id !== routeId));
-        })
-        .catch(() => alert("Delete failed"));
+      try {
+        await axiosInstance.delete(`/staff/${staffId}/remove-task/${routeId}`);
+        setAssignedRoutes((prev) =>
+          prev.filter((r) => r.routeId !== routeId)
+        );
+        setSelectedRoutes((prev) => prev.filter((id) => id !== routeId));
+      } catch {
+        alert("Delete failed");
+      }
     }
     setMenuIndex(null);
   };

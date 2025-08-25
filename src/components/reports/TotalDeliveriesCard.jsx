@@ -2,8 +2,8 @@
 import React, { useEffect, useState } from "react";
 import deliveriesImg from "../../assets/icons/boxex.png";
 import "../../styles/ui/report.css";
-import axios from "axios";
-import BASE_URL from "../../utils/apiConfig";
+import axiosInstance from "../../utils/axiosInterceptor";
+
 
 
 const TotalDeliveriesCard = () => {
@@ -13,7 +13,7 @@ const TotalDeliveriesCard = () => {
   useEffect(() => {
     const fetchDeliveredStats = async () => {
       try {
-        const response = await axios.get(`${BASE_URL}/deliveries/delivered-stats`);
+        const response = await axiosInstance.get("/deliveries/delivered-stats");
         const { totalDelivered, growth } = response.data;
         setTotalDelivered(totalDelivered);
         setGrowth(growth);

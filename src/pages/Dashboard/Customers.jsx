@@ -4,8 +4,7 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import "../../styles/ui/transaction.css";
-import BASE_URL from "../../utils/apiConfig";
-
+import axiosInstance from "../../utils/axiosInterceptor";
 
 const Customers = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -23,21 +22,18 @@ const Customers = () => {
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
-        const res = await fetch(`${BASE_URL}/customers`); // adjust if your backend is on a different host/port
-        const data = await res.json();
-        if (res.ok) {
-          const formatted = data.customers.map((cust, i) => ({
-            id: cust.customerId || `CUST-${i.toString().padStart(6, "0")}`,
-            name: cust.fullName || "N/A",
-            email: cust.email || "N/A",
-            contact: cust.phone || "N/A",
-            totalOrders: cust.totalOrders || "0",
-            status: cust.status || "Delivered",
-          }));
-          setCustomersData(formatted);
-        } else {
-          console.error("Error loading customers:", data.message);
-        }
+        const res = await axiosInstance.get("/customers"); // axios call
+        const data = res.data; // ✅ get data from axios response
+
+        const formatted = data.customers.map((cust, i) => ({
+          id: cust.customerId || `CUST-${i.toString().padStart(6, "0")}`,
+          name: cust.fullName || "N/A",
+          email: cust.email || "N/A",
+          contact: cust.phone || "N/A",
+          totalOrders: cust.totalOrders || "0",
+          status: cust.status || "Delivered",
+        }));
+        setCustomersData(formatted);
       } catch (error) {
         console.error("Fetch error:", error);
       }

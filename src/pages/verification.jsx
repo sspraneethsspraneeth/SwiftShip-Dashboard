@@ -8,7 +8,7 @@ import rightSideImage from "../assets/bg4.png";
 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import BASE_URL from "../utils/apiConfig";
+import axiosInstance from "../utils/axiosInterceptor";
 
 
 const VerificationPage = () => {
@@ -80,49 +80,37 @@ const VerificationPage = () => {
     setLoading(true);
     try {
       if (source === "register") {
-        const res = await fetch(`${BASE_URL}/register`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password, code: fullCode }),
+        const { data } = await axiosInstance.post("/register", {
+          email,
+          password,
+          code: fullCode,
         });
 
-        const data = await res.json();
-
-        if (res.ok) {
-          toast.success("Registration successful! Please log in.", {
+        if (data.message === "User already exists") {
+          toast.info("User already exists. Redirecting to login.", {
             onClose: () => navigate("/login"),
             autoClose: 3000,
           });
         } else {
-          if (data.message === "User already exists") {
-            toast.info("User already exists. Redirecting to login.", {
-              onClose: () => navigate("/login"),
-              autoClose: 3000,
-            });
-          } else {
-            toast.error(data.message || "Registration failed.");
-          }
-        }
-      } else if (source === "forgot") {
-        const res = await fetch(`${BASE_URL}/verify-code`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, code: fullCode }),
-        });
-
-        const data = await res.json();
-
-        if (res.ok) {
-          toast.success("Code verified! Please set your new password.", {
-            onClose: () => navigate("/newpass", { state: { email } }),
+          toast.success("Registration successful! Please log in.", {
+            onClose: () => navigate("/login"),
             autoClose: 3000,
           });
-        } else {
-          toast.error(data.message || "Verification failed.");
         }
+      } else if (source === "forgot") {
+        const { data } = await axiosInstance.post("/verify-code", {
+          email,
+          code: fullCode,
+        });
+
+        toast.success("Code verified! Please set your new password.", {
+          onClose: () => navigate("/newpass", { state: { email } }),
+          autoClose: 3000,
+        });
       }
     } catch (err) {
-      toast.error("Error: " + err.message);
+      const msg = err.response?.data?.message || err.message || "Verification failed.";
+      toast.error(msg);
     } finally {
       setLoading(false);
     }

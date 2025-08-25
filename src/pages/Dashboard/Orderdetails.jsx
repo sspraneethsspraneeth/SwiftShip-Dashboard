@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import FulfillmentModal from "../../components/order/FulfillmentModal";
 import "../../styles/ui/ordermanagement.css";
-import BASE_URL from "../../utils/apiConfig";
+import axiosInstance from "../../utils/axiosInterceptor";
 
 
 const OrderDetails = () => {
@@ -15,36 +15,34 @@ const OrderDetails = () => {
   const [loading, setLoading] = useState(!order);
 
   useEffect(() => {
-    const fetchOrder = async () => {
-      try {
-        const res = await fetch(`${BASE_URL}/orders/${orderId}`);
-        const data = await res.json();
-        setOrder(data.order || data);
-      } catch (err) {
-        console.error("Failed to fetch order:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    const fetchTransactions = async () => {
-      try {
-        const res = await fetch(`${BASE_URL}/transactions/all`);
-        const data = await res.json();
-        setTransactions(data || []);
-      } catch (err) {
-        console.error("Failed to fetch transactions:", err);
-      }
-    };
-
-    if (!order) {
-      fetchOrder();
-    } else {
+  const fetchOrder = async () => {
+    try {
+      const res = await axiosInstance.get(`/orders/${orderId}`);
+      setOrder(res.data.order || res.data);
+    } catch (err) {
+      console.error("Failed to fetch order:", err);
+    } finally {
       setLoading(false);
     }
+  };
 
-    fetchTransactions();
-  }, [order, orderId]);
+    const fetchTransactions = async () => {
+    try {
+      const res = await axiosInstance.get("/transactions/all");
+      setTransactions(res.data || []);
+    } catch (err) {
+      console.error("Failed to fetch transactions:", err);
+    }
+  };
+
+  if (!order) {
+    fetchOrder();
+  } else {
+    setLoading(false);
+  }
+
+  fetchTransactions();
+}, [order, orderId]);
 
   const handleFulfillClick = () => setShowModal(true);
   const toggleSelect = () => setSelected(!selected);
